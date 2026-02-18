@@ -15,9 +15,10 @@ Rationale:
 - Middleware supports dual backend selection via `CLAWOS_MEMORY_BACKEND=json|lancedb`.
 - `json` mode preserves lightweight file persistence for local bootstrap environments.
 - `lancedb` mode provides local vector table persistence for `add/search/pin`.
-- Embedding providers are selectable via `CLAWOS_EMBEDDING_PROVIDER=local|google|openai`.
+- Embedding providers are selectable via `CLAWOS_EMBEDDING_PROVIDER=local|google|openai|ollama`.
 - Google mode uses Gemini embeddings (`GOOGLE_API_KEY`, optional `GOOGLE_EMBEDDING_MODEL`) and keeps fixed vector dimensionality for stable LanceDB schema.
 - OpenAI mode uses `OPENAI_API_KEY` (optional model override `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`).
+- Ollama mode uses local HTTP embeddings (`OLLAMA_EMBEDDING_BASE_URL`, optional model override `OLLAMA_EMBEDDING_MODEL=nomic-embed-text`).
 
 ## Memory Layers
 

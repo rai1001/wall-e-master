@@ -315,3 +315,13 @@ Risks: Compatibility aliases can mask upstream emitter drift if producers rely o
 Validation done: pnpm --filter @clawos/middleware test src/__tests__/usage.telemetry-contract.test.ts src/__tests__/bridge.cost-telemetry.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added shared telemetry parser contract used by `/api/costs/usage` and websocket bridge path, including nested envelope support and updated contract documentation.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add Ollama embedding adapter for local shared-memory vectorization.
+Phase: Phase 1
+Rules checked: 2, 3, 6, 7, 8
+Risks: Ollama mode depends on local service availability at configured base URL and model install state.
+Validation done: pnpm --filter @clawos/middleware test src/__tests__/memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added `ollama` embedding provider path (`/api/embed`) with env-configurable endpoint/model, plus regression coverage and runbook/env updates.
+```

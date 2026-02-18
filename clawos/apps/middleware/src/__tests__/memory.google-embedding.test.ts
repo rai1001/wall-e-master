@@ -11,6 +11,8 @@ const previousEmbeddingProvider = process.env.CLAWOS_EMBEDDING_PROVIDER;
 const previousGoogleApiKey = process.env.GOOGLE_API_KEY;
 const previousOpenAiApiKey = process.env.OPENAI_API_KEY;
 const previousOpenAiEmbeddingModel = process.env.OPENAI_EMBEDDING_MODEL;
+const previousOllamaEmbeddingBaseUrl = process.env.OLLAMA_EMBEDDING_BASE_URL;
+const previousOllamaEmbeddingModel = process.env.OLLAMA_EMBEDDING_MODEL;
 
 afterEach(() => {
   if (previousBackend === undefined) {
@@ -41,6 +43,18 @@ afterEach(() => {
     delete process.env.OPENAI_EMBEDDING_MODEL;
   } else {
     process.env.OPENAI_EMBEDDING_MODEL = previousOpenAiEmbeddingModel;
+  }
+
+  if (previousOllamaEmbeddingBaseUrl === undefined) {
+    delete process.env.OLLAMA_EMBEDDING_BASE_URL;
+  } else {
+    process.env.OLLAMA_EMBEDDING_BASE_URL = previousOllamaEmbeddingBaseUrl;
+  }
+
+  if (previousOllamaEmbeddingModel === undefined) {
+    delete process.env.OLLAMA_EMBEDDING_MODEL;
+  } else {
+    process.env.OLLAMA_EMBEDDING_MODEL = previousOllamaEmbeddingModel;
   }
 
   vi.unstubAllGlobals();
@@ -206,6 +220,64 @@ describe("memory store google embedding provider", () => {
         .filter((value): value is { model?: string } => value !== null);
 
       expect(requestBodies.every((body) => body.model === "text-embedding-3-small")).toBe(true);
+    } finally {
+      rmSync(dbDir, { recursive: true, force: true });
+    }
+  });
+
+  it("embeds via Ollama provider when configured", async () => {
+    process.env.CLAWOS_MEMORY_BACKEND = "lancedb";
+    process.env.CLAWOS_EMBEDDING_PROVIDER = "ollama";
+    process.env.OLLAMA_EMBEDDING_BASE_URL = "http://127.0.0.1:11434";
+    process.env.OLLAMA_EMBEDDING_MODEL = "nomic-embed-text";
+
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          embeddings: [[0.11, -0.08, 0.42, 0.09]]
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      )
+    );
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const dbDir = mkdtempSync(join(tmpdir(), "clawos-memory-ollama-embedding-"));
+    try {
+      const store = new MemoryStore(dbDir);
+      const memoryId = await store.add({
+        content: "Ollama embedding vector pipeline active",
+        metadata: {
+          agent_id: "lince",
+          project_id: "proj_001",
+          source: "system",
+          tags: ["ollama", "embedding"]
+        }
+      });
+
+      const results = await store.search("ollama embedding");
+      expect(results.some((row) => row.id === memoryId)).toBe(true);
+      expect(fetchMock).toHaveBeenCalled();
+      const endpoint = String(fetchMock.mock.calls[0]?.[0]);
+      expect(endpoint).toContain("/api/embed");
+
+      const requestBodies = fetchMock.mock.calls
+        .map((call) => {
+          const init = call[1] as { body?: string } | undefined;
+          if (!init?.body || typeof init.body !== "string") {
+            return null;
+          }
+
+          return JSON.parse(init.body) as { model?: string; input?: string };
+        })
+        .filter((value): value is { model?: string; input?: string } => value !== null);
+
+      expect(requestBodies.every((body) => body.model === "nomic-embed-text")).toBe(true);
+      expect(requestBodies.every((body) => typeof body.input === "string" && body.input.length > 0)).toBe(true);
     } finally {
       rmSync(dbDir, { recursive: true, force: true });
     }

@@ -60,6 +60,11 @@ interface OpenAiEmbeddingPayload {
   }>;
 }
 
+interface OllamaEmbeddingPayload {
+  embeddings?: unknown[][];
+  embedding?: unknown[];
+}
+
 class GoogleEmbeddingProvider implements EmbeddingProvider {
   private readonly apiKey: string;
   private readonly model: string;
@@ -176,6 +181,69 @@ class OpenAiEmbeddingProvider implements EmbeddingProvider {
   }
 }
 
+class OllamaEmbeddingProvider implements EmbeddingProvider {
+  private readonly model: string;
+  private readonly baseUrl: string;
+
+  constructor(
+    model = process.env.OLLAMA_EMBEDDING_MODEL ?? "nomic-embed-text",
+    baseUrl = process.env.OLLAMA_EMBEDDING_BASE_URL ?? "http://127.0.0.1:11434"
+  ) {
+    this.model = model;
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+  }
+
+  async embed(text: string, _task: EmbeddingTask): Promise<number[]> {
+    const endpoint = `${this.baseUrl}/api/embed`;
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: this.model,
+          input: text
+        })
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown error";
+      throw new EmbeddingRuntimeError(`Ollama embeddings request failed: ${message}`);
+    }
+
+    if (!response.ok) {
+      throw new EmbeddingRuntimeError(`Ollama embeddings request failed with status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as OllamaEmbeddingPayload;
+    const rawValues = this.extractValues(payload);
+    if (!rawValues) {
+      throw new EmbeddingRuntimeError("Ollama embeddings response did not include vector values.");
+    }
+
+    const numericValues = rawValues.map((value) => Number(value));
+    if (!numericValues.every((value) => Number.isFinite(value))) {
+      throw new EmbeddingRuntimeError("Ollama embeddings response included invalid vector values.");
+    }
+
+    return normalizeVector(numericValues);
+  }
+
+  private extractValues(payload: OllamaEmbeddingPayload): unknown[] | null {
+    if (Array.isArray(payload.embeddings) && payload.embeddings.length > 0 && Array.isArray(payload.embeddings[0])) {
+      return payload.embeddings[0];
+    }
+
+    if (Array.isArray(payload.embedding)) {
+      return payload.embedding;
+    }
+
+    return null;
+  }
+}
+
 function createEmbeddingProviderFromEnv(): EmbeddingProvider {
   const provider = String(process.env.CLAWOS_EMBEDDING_PROVIDER ?? "local").trim().toLowerCase();
 
@@ -201,6 +269,10 @@ function createEmbeddingProviderFromEnv(): EmbeddingProvider {
     return new OpenAiEmbeddingProvider(apiKey);
   }
 
+  if (provider === "ollama") {
+    return new OllamaEmbeddingProvider();
+  }
+
   throw new EmbeddingConfigurationError(`Unsupported CLAWOS_EMBEDDING_PROVIDER: ${provider}`);
 }
 
@@ -211,6 +283,7 @@ export {
   LocalEmbeddingProvider,
   GoogleEmbeddingProvider,
   OpenAiEmbeddingProvider,
+  OllamaEmbeddingProvider,
   createEmbeddingProviderFromEnv
 };
 export type { EmbeddingTask, EmbeddingProvider };

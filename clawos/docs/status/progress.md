@@ -141,6 +141,11 @@ Last update: 2026-02-18
    - bridge now supports canonical and compatibility envelopes (flat or nested `payload|data|telemetry` with camelCase aliases)
    - added contract tests for valid/invalid telemetry parsing and nested bridge event ingestion
    - API/OpenAPI docs now define a single canonical telemetry schema reused by REST and websocket streams
+34. Ollama embedding adapter support:
+   - embedding provider registry now supports `CLAWOS_EMBEDDING_PROVIDER=ollama`
+   - LanceDB memory vectorization now supports local Ollama embeddings over HTTP (`/api/embed`)
+   - optional env overrides added for local endpoint/model (`OLLAMA_EMBEDDING_BASE_URL`, `OLLAMA_EMBEDDING_MODEL`)
+   - regression tests cover successful Ollama embedding request flow
 
 ## In Progress
 
@@ -148,4 +153,4 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Optional: add Ollama embedding adapter behind current provider registry
+1. None

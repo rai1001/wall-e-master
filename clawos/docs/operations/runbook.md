@@ -20,9 +20,10 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - `CLAWOS_MEMORY_BACKEND=json|lancedb` (default `json`)
    - if `json`: `CLAWOS_MEMORY_PATH` or `CLAWOS_MEMORY_DIR`
    - if `lancedb`: `CLAWOS_MEMORY_LANCEDB_DIR` (or `CLAWOS_MEMORY_DIR/lancedb`)
-   - embedding provider: `CLAWOS_EMBEDDING_PROVIDER=local|google|openai` (default `local`)
+   - embedding provider: `CLAWOS_EMBEDDING_PROVIDER=local|google|openai|ollama` (default `local`)
    - if `google`: set `GOOGLE_API_KEY` (optional model override `GOOGLE_EMBEDDING_MODEL`)
    - if `openai`: set `OPENAI_API_KEY` (optional model override `OPENAI_EMBEDDING_MODEL`)
+   - if `ollama`: optional `OLLAMA_EMBEDDING_BASE_URL` (default `http://127.0.0.1:11434`) and optional model override `OLLAMA_EMBEDDING_MODEL`
 7. Knowledge feed/graph persistence path configured (optional but recommended):
    - `CLAWOS_KNOWLEDGE_PATH` or `CLAWOS_KNOWLEDGE_DIR`
 8. Cost summary persistence path configured (optional but recommended):
@@ -120,6 +121,7 @@ Actions:
    - embedding mode:
      - `google`: verify `GOOGLE_API_KEY` and outbound network access
      - `openai`: verify `OPENAI_API_KEY` and outbound network access
+     - `ollama`: verify local Ollama service availability and `OLLAMA_EMBEDDING_BASE_URL`
 
 ### 3.1. Knowledge feed/graph is empty after restart
 
