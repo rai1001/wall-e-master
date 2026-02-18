@@ -1,5 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
+
 interface RateLimitConfig {
   maxRequests: number;
   windowMs: number;
@@ -54,16 +56,22 @@ function createRateLimitMiddleware(config?: Partial<RateLimitConfig>) {
 
     if (existing.count >= maxRequests) {
       const retryAfterSeconds = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
-      res.setHeader("Retry-After", String(retryAfterSeconds));
-      res.status(429).json({
-        error: {
-          code: "rate_limited",
-          message: "Too many requests. Please wait and retry.",
-          details: {
-            recovery_action: "Wait a few seconds and retry the same action."
-          }
+      emitSecurityEvent({
+        requestId: String(res.locals.request_id ?? "unknown"),
+        event: "rate_limit_denied",
+        outcome: "denied",
+        details: {
+          path: req.path,
+          authorization: authHeader,
+          retry_after_seconds: retryAfterSeconds
         }
       });
+      res.setHeader("Retry-After", String(retryAfterSeconds));
+      res.status(429).json(
+        buildErrorResponse("rate_limited", "Too many requests. Please wait and retry.", {
+          recovery_action: "Wait a few seconds and retry the same action."
+        })
+      );
       return;
     }
 

@@ -1,29 +1,46 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
+
 function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   const expectedToken = process.env.API_BEARER_TOKEN ?? "dev-token";
+  const requestId = String(res.locals.request_id ?? "unknown");
 
   if (!header || !header.startsWith("Bearer ")) {
-    res.status(401).json({
-      error: {
-        code: "unauthorized",
-        message: "Bearer token required",
-        details: {}
+    emitSecurityEvent({
+      requestId,
+      event: "auth_denied",
+      outcome: "denied",
+      details: {
+        reason: "missing_bearer_token",
+        authorization: header ?? ""
       }
     });
+    res.status(401).json(
+      buildErrorResponse("unauthorized", "Bearer token required", {
+        recovery_action: "Send Authorization: Bearer <API_BEARER_TOKEN>."
+      })
+    );
     return;
   }
 
   const token = header.slice("Bearer ".length).trim();
   if (token !== expectedToken) {
-    res.status(401).json({
-      error: {
-        code: "unauthorized",
-        message: "Invalid bearer token",
-        details: {}
+    emitSecurityEvent({
+      requestId,
+      event: "auth_denied",
+      outcome: "denied",
+      details: {
+        reason: "invalid_bearer_token",
+        authorization: header
       }
     });
+    res.status(401).json(
+      buildErrorResponse("unauthorized", "Invalid bearer token", {
+        recovery_action: "Verify API_BEARER_TOKEN value and retry."
+      })
+    );
     return;
   }
 

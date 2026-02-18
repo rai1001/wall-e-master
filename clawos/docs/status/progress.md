@@ -56,12 +56,19 @@ Last update: 2026-02-18
    - helper command blocks for Tailscale Funnel and Cloudflare Tunnel
    - new `/security` UI view and proxy route for non-technical guided setup
    - middleware and E2E tests covering checklist API and security page rendering
+17. Observability expansion baseline:
+   - error taxonomy in API error details (`details.taxonomy`)
+   - security event logs for auth denial, rate-limit denial, and policy denial
+   - optional policy guard `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true`
+   - global-memory elevation now returns `403 policy_denied` without explicit approval header
+   - log redaction tests for tokens/audio/api keys in observability pipeline
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
+2. Extend taxonomy coverage to all remaining middleware routes
 
 ## Next (Guide-Aligned)
 
-1. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
-2. Add cost/control widgets per agent and project
+1. Add cost/control widgets per agent and project
+2. Extend observability dashboards and alert-ready counters

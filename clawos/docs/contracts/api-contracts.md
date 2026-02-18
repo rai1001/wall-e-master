@@ -108,6 +108,12 @@ Request:
 }
 ```
 
+Optional header when `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true` and requesting `memory_access=global`:
+
+```text
+x-clawos-global-memory-approved: true
+```
+
 Response `200`:
 
 ```json
@@ -118,6 +124,21 @@ Response `200`:
     "skills": ["browser", "python"],
     "memory_access": "global",
     "status": "idle"
+  }
+}
+```
+
+Response `403` (policy denied):
+
+```json
+{
+  "error": {
+    "code": "policy_denied",
+    "message": "Global memory elevation requires explicit approval.",
+    "details": {
+      "taxonomy": "policy",
+      "recovery_action": "Set x-clawos-global-memory-approved: true after approving least-privilege impact."
+    }
   }
 }
 ```
@@ -392,7 +413,20 @@ All non-2xx responses should follow:
   "error": {
     "code": "validation_error",
     "message": "voice_id is required",
-    "details": {}
+    "details": {
+      "taxonomy": "validation"
+    }
   }
 }
 ```
+
+`error.details.taxonomy` classifies failures for observability:
+
+- `auth`
+- `validation`
+- `policy`
+- `resource`
+- `throttle`
+- `dependency`
+- `availability`
+- `unknown`

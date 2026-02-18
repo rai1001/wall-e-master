@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import { buildErrorResponse } from "../services/observability";
 import { createSttProviderFromEnv } from "../services/stt-provider";
 import { createTtsProviderFromEnv } from "../services/tts-provider";
 
@@ -13,55 +14,39 @@ voiceRouter.post("/process", async (req, res) => {
   const voiceId = typeof payload.voice_id === "string" ? payload.voice_id.trim() : "";
 
   if (!audioBase64 || !agentId) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "audio_base64 and agent_id are required",
-        details: {
-          recovery_action: "Attach voice audio and select the active agent, then retry."
-        }
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "audio_base64 and agent_id are required", {
+        recovery_action: "Attach voice audio and select the active agent, then retry."
+      })
+    );
   }
 
   let audioBuffer = Buffer.alloc(0);
   try {
     audioBuffer = Buffer.from(audioBase64, "base64");
   } catch {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "audio_base64 must be valid base64",
-        details: {
-          recovery_action: "Record audio again and submit a valid clip."
-        }
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "audio_base64 must be valid base64", {
+        recovery_action: "Record audio again and submit a valid clip."
+      })
+    );
   }
 
   if (audioBuffer.length === 0) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "audio clip is empty",
-        details: {
-          recovery_action: "Record at least one second of audio and retry."
-        }
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "audio clip is empty", {
+        recovery_action: "Record at least one second of audio and retry."
+      })
+    );
   }
 
   if (audioBuffer.length > MAX_AUDIO_BYTES) {
-    return res.status(413).json({
-      error: {
-        code: "payload_too_large",
-        message: "Audio payload exceeds maximum size",
-        details: {
-          limit_bytes: MAX_AUDIO_BYTES,
-          recovery_action: "Send a shorter audio clip or reduce audio quality."
-        }
-      }
-    });
+    return res.status(413).json(
+      buildErrorResponse("payload_too_large", "Audio payload exceeds maximum size", {
+        limit_bytes: MAX_AUDIO_BYTES,
+        recovery_action: "Send a shorter audio clip or reduce audio quality."
+      })
+    );
   }
 
   let sttProvider;
@@ -71,15 +56,11 @@ voiceRouter.post("/process", async (req, res) => {
     ttsProvider = createTtsProviderFromEnv();
   } catch (error) {
     const message = error instanceof Error ? error.message : "Voice provider configuration is invalid.";
-    return res.status(503).json({
-      error: {
-        code: "provider_configuration_error",
-        message: "Voice providers are not configured correctly",
-        details: {
-          recovery_action: message
-        }
-      }
-    });
+    return res.status(503).json(
+      buildErrorResponse("provider_configuration_error", "Voice providers are not configured correctly", {
+        recovery_action: message
+      })
+    );
   }
 
   try {
@@ -95,15 +76,11 @@ voiceRouter.post("/process", async (req, res) => {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Voice provider request failed.";
-    return res.status(502).json({
-      error: {
-        code: "provider_runtime_error",
-        message: "Voice processing failed at external provider",
-        details: {
-          recovery_action: message
-        }
-      }
-    });
+    return res.status(502).json(
+      buildErrorResponse("provider_runtime_error", "Voice processing failed at external provider", {
+        recovery_action: message
+      })
+    );
   }
 });
 

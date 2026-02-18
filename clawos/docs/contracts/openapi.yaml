@@ -83,6 +83,13 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: x-clawos-global-memory-approved
+          required: false
+          schema:
+            type: string
+            enum: ["true"]
+          description: Required when policy enforces explicit approval for memory_access=global.
       requestBody:
         required: true
         content:
@@ -98,6 +105,12 @@ paths:
                 $ref: "#/components/schemas/UpdateAgentPermissionsResponse"
         "400":
           description: Invalid permissions payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Policy denied (global memory elevation blocked)
           content:
             application/json:
               schema:

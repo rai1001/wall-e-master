@@ -20,6 +20,8 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
    - `REMOTE_ACCESS_PROVIDER=none|tailscale|cloudflare`
    - `TAILSCALE_FUNNEL_URL` or `CLOUDFLARE_TUNNEL_URL` when provider is enabled
+7. Optional policy hardening:
+   - `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true` to require explicit header before global memory elevation
 
 ## Startup
 
@@ -104,6 +106,13 @@ Actions:
 2. review each `checks[].recovery_action`
 3. apply tunnel/provider vars and restart middleware
 4. verify `overall_status` changes from `review_required` to `ready_for_remote_access`
+
+### 6. Global memory permission update denied (`403 policy_denied`)
+
+Actions:
+1. verify if `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true`
+2. resend request with header `x-clawos-global-memory-approved: true` only after approval
+3. check logs for `security_event=global_memory_access_denied` entries
 
 ## Deployment Safety
 

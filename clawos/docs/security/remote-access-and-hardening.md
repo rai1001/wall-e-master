@@ -64,6 +64,12 @@ Use Cloudflare Tunnel as optional fallback ingress.
    - rate limit hits
    - policy denial events
 
+Current event names:
+
+- `auth_denied`
+- `rate_limit_denied`
+- `global_memory_access_denied`
+
 ## Threat Baseline
 
 1. Token theft

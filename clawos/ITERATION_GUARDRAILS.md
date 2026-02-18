@@ -175,3 +175,13 @@ Risks: Checklist validates environment posture only; it does not verify external
 Validation done: pnpm --filter @clawos/middleware test security.checklist.test.ts; pnpm --filter @clawos/web test:e2e tests/security-checklist.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/api/security/checklist` backend checks, `/security` non-technical web view, and helper command guidance for secure remote access setup.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Expand observability with error taxonomy, policy-denial events, and log redaction tests.
+Phase: Phase 4
+Rules checked: 1, 2, 4, 7, 8
+Risks: Taxonomy mapping is code-based and must stay synced when new error codes are introduced.
+Validation done: pnpm --filter @clawos/middleware test policy.denial.test.ts observability.redaction.test.ts voice.security.test.ts auth.required.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added observability service with sensitive-data redaction, security event logs (`auth_denied`, `rate_limit_denied`, `global_memory_access_denied`), and policy guard for global-memory elevation.
+```

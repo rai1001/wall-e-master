@@ -2,10 +2,15 @@ import { Router } from "express";
 
 import { AgentFactory } from "../services/agent-factory";
 import { AgentRegistry } from "../services/agent-registry";
+import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
 
 const agentsRouter = Router();
 const agentFactory = new AgentFactory();
 const agentRegistry = new AgentRegistry();
+
+function isGlobalMemoryApprovalRequired(): boolean {
+  return process.env.CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL === "true";
+}
 
 agentsRouter.post("/spawn", (req, res) => {
   const { name, role, voice_id, skills, memory_access } = req.body ?? {};
@@ -102,6 +107,26 @@ agentsRouter.patch("/:agentId/permissions", (req, res) => {
         details: {}
       }
     });
+  }
+
+  const approvalHeader = String(req.header("x-clawos-global-memory-approved") ?? "").trim().toLowerCase();
+  const globalApprovalGranted = approvalHeader === "true";
+  if (isGlobalMemoryApprovalRequired() && memoryAccess === "global" && !globalApprovalGranted) {
+    emitSecurityEvent({
+      requestId: String(res.locals.request_id ?? "unknown"),
+      event: "global_memory_access_denied",
+      outcome: "denied",
+      details: {
+        agent_id: agentId,
+        requested_memory_access: memoryAccess,
+        approval_header: approvalHeader
+      }
+    });
+    return res.status(403).json(
+      buildErrorResponse("policy_denied", "Global memory elevation requires explicit approval.", {
+        recovery_action: "Set x-clawos-global-memory-approved: true after approving least-privilege impact."
+      })
+    );
   }
 
   const updated = agentRegistry.updatePermissions(agentId, skills, memoryAccess);
