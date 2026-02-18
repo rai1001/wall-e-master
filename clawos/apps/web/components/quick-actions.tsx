@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function QuickActions() {
   return (
     <article className="card">
@@ -5,7 +7,9 @@ export function QuickActions() {
       <p className="muted">Usa botones simples para iniciar sin pasos tecnicos.</p>
       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
         <button type="button">Hablar con agente</button>
-        <button type="button">Crear agente</button>
+        <Link className="action-link" href="/agents/new">
+          Crear agente
+        </Link>
         <button type="button">Buscar memoria</button>
       </div>
     </article>

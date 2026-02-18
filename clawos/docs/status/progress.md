@@ -25,11 +25,16 @@ Last update: 2026-02-18
    - `Projects` page now reads `/api/projects/status` through Next.js proxy routes
    - `Chat` now retrieves shared memory context via `/api/memory/search`
    - project namespace filtering enforced in middleware memory search
+11. Agent creation wizard:
+   - new page `/agents/new` with presets and safe defaults
+   - skills and memory permissions toggles for non-technical users
+   - proxy route `/api/agents/spawn` connected to middleware
+   - E2E coverage for successful agent creation flow
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Agent creation wizard with presets connected to `/api/agents/spawn`
+2. Agent list/management view (status, edit permissions, sleep/wake controls)
 
 ## Next (Guide-Aligned)
 

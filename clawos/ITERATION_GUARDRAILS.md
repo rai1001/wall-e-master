@@ -115,3 +115,13 @@ Risks: Web app depends on local middleware availability; proxy routes return 503
 Validation done: pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added Next.js proxy API routes, connected Projects and Chat views to real middleware endpoints, and added E2E coverage for live data rendering.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Implement guided agent creation wizard connected to middleware spawn endpoint.
+Phase: Phase 3
+Rules checked: 1, 2, 4, 6, 8
+Risks: Preset defaults are static and may need tuning per team use case; no agent management list yet after creation.
+Validation done: pnpm --filter @clawos/web test:e2e tests/agent-wizard.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/agents/new`, `/api/agents/spawn` proxy, non-technical preset/permission form, and E2E verification of spawn payload and success flow.
+```

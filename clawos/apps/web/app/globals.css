@@ -38,6 +38,18 @@ a {
   font-weight: 600;
 }
 
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .grid {
   display: grid;
   gap: 16px;
