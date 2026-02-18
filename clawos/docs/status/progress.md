@@ -127,6 +127,10 @@ Last update: 2026-02-18
    - per-agent counters now accumulate real `tokens_in`, `tokens_out`, and `cost_usd` telemetry
    - cost summary remains budget-aware and emits over-budget security events when thresholds are crossed
    - regression tests added for usage ingestion and validation error handling
+31. Automatic bridge-to-cost telemetry flow:
+   - OpenClaw websocket bridge now parses `usage_telemetry` stream events
+   - bridge events are auto-recorded into shared cost store (same source used by `/api/costs/summary`)
+   - new integration test validates end-to-end flow: websocket event -> persisted cost summary
 
 ## In Progress
 
@@ -134,5 +138,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Optional: wire OpenClaw websocket bridge events to auto-publish usage telemetry into `/api/costs/usage` (remove manual posting)
+1. Optional: define and document canonical OpenClaw `usage_telemetry` event schema for production emitter compatibility
 2. Optional: add OpenAI/Ollama embedding adapters behind current provider registry

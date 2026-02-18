@@ -285,3 +285,13 @@ Risks: Accuracy depends on external producers sending trustworthy `tokens_in`, `
 Validation done: pnpm --filter @clawos/middleware test costs.summary.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added `POST /api/costs/usage`, accumulated per-agent token/cost counters in durable store, and documented contracts/runbook updates for telemetry-driven cost control.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Auto-ingest websocket `usage_telemetry` events from OpenClaw bridge into cost controls.
+Phase: Phase 4
+Rules checked: 2, 6, 7, 8
+Risks: Event compatibility depends on emitter payload shape (`type`, `project_id`, token/cost fields).
+Validation done: pnpm --filter @clawos/middleware test openclaw.bridge.test.ts bridge.cost-telemetry.test.ts costs.summary.test.ts; pnpm --filter @clawos/middleware test
+Outcome: OpenClaw bridge now parses usage telemetry events and records them directly in shared cost store used by cost APIs, with end-to-end regression coverage.
+```

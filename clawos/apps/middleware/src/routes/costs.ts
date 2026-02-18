@@ -1,10 +1,9 @@
 import { Router } from "express";
 
-import { CostStore } from "../services/cost-store";
+import { costStore } from "../services/cost-store-singleton";
 import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
 
 const costsRouter = Router();
-const costStore = new CostStore();
 
 costsRouter.get("/summary", (req, res) => {
   const projectId = String(req.query.project_id ?? "proj_001").trim();

@@ -1,15 +1,42 @@
 import { Router } from "express";
 
 import { AgentRegistry } from "../services/agent-registry";
-import { buildErrorResponse } from "../services/observability";
-import { OpenClawBridge } from "../services/openclaw-bridge";
+import { costStore } from "../services/cost-store-singleton";
+import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
+import { OpenClawBridge, type UsageTelemetryEvent } from "../services/openclaw-bridge";
 
 const projectsRouter = Router();
 const agentRegistry = new AgentRegistry();
+
+function handleBridgeUsageTelemetry(event: UsageTelemetryEvent): void {
+  const summary = costStore.recordUsage(event.project_id, {
+    agent_id: event.agent_id,
+    agent_name: event.agent_name,
+    tokens_in: event.tokens_in,
+    tokens_out: event.tokens_out,
+    cost_usd: event.cost_usd,
+    timestamp: event.timestamp
+  });
+
+  if (summary.status === "over_budget") {
+    emitSecurityEvent({
+      requestId: "bridge-stream",
+      event: "project_budget_overrun",
+      outcome: "warning",
+      details: {
+        project_id: summary.project_id,
+        spent_usd: summary.spent_usd,
+        budget_usd: summary.budget_usd
+      }
+    });
+  }
+}
+
 const openClawBridge = new OpenClawBridge({
   url: process.env.OPENCLAW_WS_URL ?? "ws://127.0.0.1:18789",
   reconnectAttempts: 3,
-  connectTimeoutMs: 700
+  connectTimeoutMs: 700,
+  onUsageTelemetry: handleBridgeUsageTelemetry
 });
 
 projectsRouter.get("/status", async (req, res) => {

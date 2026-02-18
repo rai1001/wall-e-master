@@ -158,9 +158,11 @@ Actions:
 ### 7.1. Cost widget does not reflect latest model/provider usage
 
 Actions:
-1. post a sample telemetry payload to `POST /api/costs/usage` and confirm `status=recorded`
-2. query `GET /api/costs/summary?project_id=<id>` and verify token/cost counters moved
-3. validate caller sends non-negative `tokens_in`, `tokens_out`, and `cost_usd`
+1. verify bridge connectivity with `GET /api/projects/status?project_id=<id>&probe=true`
+2. confirm OpenClaw stream is emitting `usage_telemetry` events (type + token/cost fields)
+3. query `GET /api/costs/summary?project_id=<id>` and verify token/cost counters moved
+4. if upstream emitter is not ready, post fallback telemetry manually to `POST /api/costs/usage`
+5. validate caller sends non-negative `tokens_in`, `tokens_out`, and `cost_usd`
 
 ### 8. Observability `alert_status=critical`
 
