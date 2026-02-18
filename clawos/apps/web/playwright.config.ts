@@ -9,7 +9,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm --filter @clawos/web dev",
     port: 3100,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 120_000
   }
 });

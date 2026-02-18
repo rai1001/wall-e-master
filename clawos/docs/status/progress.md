@@ -40,11 +40,15 @@ Last update: 2026-02-18
    - web `/agents` now edits skills and memory scope per agent
    - Next.js proxy route for permission updates
    - middleware and E2E tests for permission-save behavior
+14. Agent registry persistence:
+   - `AgentRegistry` now persists to disk (`agents-registry.json`)
+   - survives middleware restarts when using `CLOWOS_AGENTS_DIR` or `CLOWOS_AGENT_REGISTRY_PATH`
+   - persistence regression test covers restart/reload behavior
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Agent registry persistence across middleware restart
+2. Agent registry migration strategy (import existing agents on first run)
 
 ## Next (Guide-Aligned)
 

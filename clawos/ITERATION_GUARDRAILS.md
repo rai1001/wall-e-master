@@ -145,3 +145,13 @@ Risks: Permission edits remain in runtime registry only until persistent storage
 Validation done: pnpm --filter @clawos/middleware test agents.permissions.test.ts; pnpm --filter @clawos/web test:e2e tests/agents-permissions.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/api/agents/:id/permissions` in middleware, web proxy route, permission editor controls in `/agents`, and end-to-end coverage for saving permissions.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Persist agent registry state across middleware restarts.
+Phase: Phase 3
+Rules checked: 1, 2, 4, 6, 8
+Risks: Corrupted registry JSON is currently treated as empty registry; no automatic recovery/backup yet.
+Validation done: pnpm --filter @clawos/middleware test agent.registry.persistence.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Agent registry now reads/writes disk-backed JSON with configurable path, and restart persistence is verified by test.
+```
