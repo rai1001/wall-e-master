@@ -162,7 +162,10 @@ Actions:
 
 Actions:
 1. verify bridge connectivity with `GET /api/projects/status?project_id=<id>&probe=true`
-2. confirm OpenClaw stream is emitting `usage_telemetry` events (type + token/cost fields)
+2. confirm OpenClaw stream is emitting canonical `usage_telemetry` envelopes:
+   - required fields: `project_id`, `agent_id`, `tokens_in`, `tokens_out`, `cost_usd`
+   - optional: `agent_name`, `timestamp`
+   - compatible envelopes accepted: flat payload, or nested in `payload|data|telemetry` with camelCase aliases
 3. query `GET /api/costs/summary?project_id=<id>` and verify token/cost counters moved
 4. if upstream emitter is not ready, post fallback telemetry manually to `POST /api/costs/usage`
 5. validate caller sends non-negative `tokens_in`, `tokens_out`, and `cost_usd`

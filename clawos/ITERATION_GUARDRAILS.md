@@ -305,3 +305,13 @@ Risks: OpenAI embedding mode depends on valid `OPENAI_API_KEY` and outbound netw
 Validation done: pnpm --filter @clawos/middleware test memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Embedding provider registry now supports `openai`, memory vectorization can use configurable OpenAI embeddings model, and regression tests verify both configuration guardrails and successful provider flow.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Canonicalize usage telemetry schema between API and OpenClaw bridge ingestion.
+Phase: Phase 4
+Rules checked: 2, 6, 7, 8
+Risks: Compatibility aliases can mask upstream emitter drift if producers rely on non-canonical fields long-term.
+Validation done: pnpm --filter @clawos/middleware test src/__tests__/usage.telemetry-contract.test.ts src/__tests__/bridge.cost-telemetry.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added shared telemetry parser contract used by `/api/costs/usage` and websocket bridge path, including nested envelope support and updated contract documentation.
+```

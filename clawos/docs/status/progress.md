@@ -136,6 +136,11 @@ Last update: 2026-02-18
    - memory pipeline calls OpenAI embeddings API with configurable model (`OPENAI_EMBEDDING_MODEL`)
    - actionable configuration error when `OPENAI_API_KEY` is missing
    - regression tests cover openai config error and successful embedding flow
+33. Canonical `usage_telemetry` contract normalization:
+   - added shared parser service used by both `/api/costs/usage` and OpenClaw websocket bridge ingestion
+   - bridge now supports canonical and compatibility envelopes (flat or nested `payload|data|telemetry` with camelCase aliases)
+   - added contract tests for valid/invalid telemetry parsing and nested bridge event ingestion
+   - API/OpenAPI docs now define a single canonical telemetry schema reused by REST and websocket streams
 
 ## In Progress
 
@@ -143,5 +148,4 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Optional: define and document canonical OpenClaw `usage_telemetry` event schema for production emitter compatibility
-2. Optional: add Ollama embedding adapter behind current provider registry
+1. Optional: add Ollama embedding adapter behind current provider registry

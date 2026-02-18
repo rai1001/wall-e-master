@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { costStore } from "../services/cost-store-singleton";
 import { buildErrorResponse, emitSecurityEvent } from "../services/observability";
+import { parseUsageTelemetryPayload } from "../services/usage-telemetry";
 
 const costsRouter = Router();
 
@@ -62,27 +63,9 @@ costsRouter.patch("/summary", (req, res) => {
 });
 
 costsRouter.post("/usage", (req, res) => {
-  const projectId = typeof req.body?.project_id === "string" ? req.body.project_id.trim() : "";
-  const agentId = typeof req.body?.agent_id === "string" ? req.body.agent_id.trim() : "";
-  const agentName = typeof req.body?.agent_name === "string" ? req.body.agent_name.trim() : "";
-  const tokensIn = req.body?.tokens_in;
-  const tokensOut = req.body?.tokens_out;
-  const costUsd = req.body?.cost_usd;
-  const timestamp = typeof req.body?.timestamp === "string" ? req.body.timestamp.trim() : undefined;
+  const usage = parseUsageTelemetryPayload(req.body);
 
-  if (
-    !projectId ||
-    !agentId ||
-    typeof tokensIn !== "number" ||
-    !Number.isFinite(tokensIn) ||
-    tokensIn < 0 ||
-    typeof tokensOut !== "number" ||
-    !Number.isFinite(tokensOut) ||
-    tokensOut < 0 ||
-    typeof costUsd !== "number" ||
-    !Number.isFinite(costUsd) ||
-    costUsd < 0
-  ) {
+  if (!usage) {
     return res.status(400).json(
       buildErrorResponse("validation_error", "Invalid usage telemetry payload", {
         recovery_action: "Send project_id, agent_id, tokens_in, tokens_out, and cost_usd with non-negative numeric values."
@@ -90,13 +73,13 @@ costsRouter.post("/usage", (req, res) => {
     );
   }
 
-  const summary = costStore.recordUsage(projectId, {
-    agent_id: agentId,
-    agent_name: agentName || undefined,
-    tokens_in: tokensIn,
-    tokens_out: tokensOut,
-    cost_usd: costUsd,
-    timestamp
+  const summary = costStore.recordUsage(usage.project_id, {
+    agent_id: usage.agent_id,
+    agent_name: usage.agent_name,
+    tokens_in: usage.tokens_in,
+    tokens_out: usage.tokens_out,
+    cost_usd: usage.cost_usd,
+    timestamp: usage.timestamp
   });
 
   if (summary.status === "over_budget") {
