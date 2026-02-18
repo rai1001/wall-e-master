@@ -225,3 +225,13 @@ Risks: Persistence relies on local filesystem write access; misconfigured paths 
 Validation done: pnpm --filter @clawos/middleware test observability.persistence.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
 Outcome: Observability service now loads/saves counters from disk (`CLAWOS_OBSERVABILITY_PATH`/`CLAWOS_OBSERVABILITY_DIR`) with retention pruning and restart persistence covered by regression test.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add non-technical knowledge map clusters to Projects view.
+Phase: Phase 3
+Rules checked: 2, 3, 6, 8
+Risks: Current cluster logic depends on `hands_off` relations and may underrepresent knowledge density if additional edge types are introduced later.
+Validation done: pnpm --filter @clawos/web test:e2e tests/knowledge-map.spec.ts; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/api/knowledge/graph` web proxy and `Mapa de Conocimiento` card with agent/finding counts and per-agent shared-handoff totals.
+```

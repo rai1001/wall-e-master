@@ -85,6 +85,11 @@ Last update: 2026-02-18
    - configurable storage path via `CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`
    - retention pruning now applies to persisted data (24h window)
    - persistence regression test validates module restart/reload behavior
+22. Knowledge map visualization for non-technical navigation:
+   - new web proxy route `GET /api/knowledge/graph`
+   - `/projects` now includes `Mapa de Conocimiento` card with plain-language cluster summary
+   - displays agent nodes, connected findings, and per-agent handoff counts
+   - E2E coverage validates cluster rendering from graph payload
 
 ## In Progress
 
@@ -93,5 +98,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Add memory cluster/map visualization for non-technical navigation
-2. Extend taxonomy coverage to all remaining middleware routes
+1. Extend taxonomy coverage to all remaining middleware routes
+2. Voice provider persistence for generated audio files

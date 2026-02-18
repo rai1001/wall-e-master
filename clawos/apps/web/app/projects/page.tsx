@@ -34,23 +34,75 @@ interface CostSummaryResponse {
   updated_at: string;
 }
 
+interface KnowledgeGraphNode {
+  id: string;
+  label: string;
+  type: string;
+}
+
+interface KnowledgeGraphEdge {
+  from: string;
+  to: string;
+  relation: string;
+}
+
+interface KnowledgeGraphResponse {
+  project_id: string;
+  nodes: KnowledgeGraphNode[];
+  edges: KnowledgeGraphEdge[];
+}
+
 function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
+}
+
+function buildAgentClusters(graph: KnowledgeGraphResponse | null): Array<{ agentLabel: string; findings: number }> {
+  if (!graph) {
+    return [];
+  }
+
+  const nodeById = new Map<string, KnowledgeGraphNode>();
+  for (const node of graph.nodes) {
+    nodeById.set(node.id, node);
+  }
+
+  const counts = new Map<string, number>();
+  for (const edge of graph.edges) {
+    if (edge.relation !== "hands_off") {
+      continue;
+    }
+
+    const fromNode = nodeById.get(edge.from);
+    const toNode = nodeById.get(edge.to);
+    if (!fromNode || !toNode || fromNode.type !== "agent" || toNode.type !== "finding") {
+      continue;
+    }
+
+    counts.set(fromNode.label, (counts.get(fromNode.label) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .map(([agentLabel, findings]) => ({ agentLabel, findings }))
+    .sort((a, b) => b.findings - a.findings || a.agentLabel.localeCompare(b.agentLabel));
 }
 
 export default function ProjectsPage() {
   const [status, setStatus] = useState<ProjectStatusResponse | null>(null);
   const [costSummary, setCostSummary] = useState<CostSummaryResponse | null>(null);
+  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraphResponse | null>(null);
   const [budgetDraft, setBudgetDraft] = useState("");
   const [error, setError] = useState<string>("");
   const [costError, setCostError] = useState<string>("");
+  const [knowledgeError, setKnowledgeError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [budgetUpdating, setBudgetUpdating] = useState(false);
 
   useEffect(() => {
     const load = async () => {
+      let projectId = "proj_001";
+
       try {
-        const response = await fetch("/api/projects/status?project_id=proj_001", {
+        const response = await fetch(`/api/projects/status?project_id=${encodeURIComponent(projectId)}`, {
           method: "GET",
           cache: "no-store"
         });
@@ -61,23 +113,43 @@ export default function ProjectsPage() {
           return;
         }
 
-        setStatus(payload as ProjectStatusResponse);
+        const projectStatus = payload as ProjectStatusResponse;
+        setStatus(projectStatus);
+        projectId = projectStatus.project_id || projectId;
+      } catch {
+        setError("No pudimos cargar el estado del proyecto.");
+      }
 
-        const costResponse = await fetch("/api/costs/summary?project_id=proj_001", {
+      try {
+        const costResponse = await fetch(`/api/costs/summary?project_id=${encodeURIComponent(projectId)}`, {
           method: "GET",
           cache: "no-store"
         });
         const costPayload = await costResponse.json();
         if (!costResponse.ok) {
           setCostError(costPayload?.error?.message ?? "No pudimos cargar el resumen de costos.");
-          return;
+        } else {
+          const summary = costPayload as CostSummaryResponse;
+          setCostSummary(summary);
+          setBudgetDraft(String(summary.budget_usd));
         }
-
-        const summary = costPayload as CostSummaryResponse;
-        setCostSummary(summary);
-        setBudgetDraft(String(summary.budget_usd));
       } catch {
-        setError("No pudimos cargar el estado del proyecto.");
+        setCostError("No pudimos cargar el resumen de costos.");
+      }
+
+      try {
+        const graphResponse = await fetch(`/api/knowledge/graph?project_id=${encodeURIComponent(projectId)}`, {
+          method: "GET",
+          cache: "no-store"
+        });
+        const graphPayload = await graphResponse.json();
+        if (!graphResponse.ok) {
+          setKnowledgeError(graphPayload?.error?.message ?? "No pudimos cargar el mapa de conocimiento.");
+        } else {
+          setKnowledgeGraph(graphPayload as KnowledgeGraphResponse);
+        }
+      } catch {
+        setKnowledgeError("No pudimos cargar el mapa de conocimiento.");
       } finally {
         setLoading(false);
       }
@@ -121,6 +193,10 @@ export default function ProjectsPage() {
       setBudgetUpdating(false);
     }
   };
+
+  const agentNodeCount = knowledgeGraph ? knowledgeGraph.nodes.filter((node) => node.type === "agent").length : 0;
+  const findingNodeCount = knowledgeGraph ? knowledgeGraph.nodes.filter((node) => node.type === "finding").length : 0;
+  const clusters = buildAgentClusters(knowledgeGraph);
 
   return (
     <section className="grid">
@@ -184,6 +260,29 @@ export default function ProjectsPage() {
                 </li>
               ))}
             </ul>
+          </>
+        ) : null}
+      </article>
+      <article className="card">
+        <h2>Mapa de Conocimiento</h2>
+        <p className="muted">Resumen simple de como fluye la informacion entre agentes.</p>
+        {loading ? <p>Cargando mapa...</p> : null}
+        {knowledgeError ? <p className="muted">{knowledgeError}</p> : null}
+        {knowledgeGraph ? (
+          <>
+            <p>Agentes en el mapa: {agentNodeCount}</p>
+            <p>Hallazgos conectados: {findingNodeCount}</p>
+            {clusters.length > 0 ? (
+              <ul>
+                {clusters.map((cluster) => (
+                  <li key={cluster.agentLabel}>
+                    {cluster.agentLabel}: {cluster.findings} hallazgos compartidos
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">Aun no hay handoffs registrados para este proyecto.</p>
+            )}
           </>
         ) : null}
       </article>
