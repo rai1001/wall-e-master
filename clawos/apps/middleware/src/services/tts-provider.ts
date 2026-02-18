@@ -2,13 +2,21 @@ interface TtsOptions {
   voiceId?: string;
 }
 
+interface TtsSynthesisResult {
+  audioBuffer: Buffer;
+  mimeType: "audio/mpeg";
+}
+
 interface TtsProvider {
-  synthesize(text: string, options?: TtsOptions): Promise<string>;
+  synthesize(text: string, options?: TtsOptions): Promise<TtsSynthesisResult>;
 }
 
 class MockTtsProvider implements TtsProvider {
-  async synthesize(_text: string): Promise<string> {
-    return "/api/voice/output/response_123.mp3";
+  async synthesize(_text: string): Promise<TtsSynthesisResult> {
+    return {
+      audioBuffer: Buffer.from("mock_tts_audio_response"),
+      mimeType: "audio/mpeg"
+    };
   }
 }
 
@@ -27,7 +35,7 @@ class ElevenLabsTtsProvider implements TtsProvider {
     this.modelId = modelId;
   }
 
-  async synthesize(text: string, options?: TtsOptions): Promise<string> {
+  async synthesize(text: string, options?: TtsOptions): Promise<TtsSynthesisResult> {
     const voiceId = options?.voiceId?.trim() || this.defaultVoiceId;
     const endpoint = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
 
@@ -49,7 +57,10 @@ class ElevenLabsTtsProvider implements TtsProvider {
     }
 
     const audioBuffer = Buffer.from(await response.arrayBuffer());
-    return `data:audio/mpeg;base64,${audioBuffer.toString("base64")}`;
+    return {
+      audioBuffer,
+      mimeType: "audio/mpeg"
+    };
   }
 }
 
@@ -74,4 +85,4 @@ function createTtsProviderFromEnv(): TtsProvider {
 }
 
 export { MockTtsProvider, ElevenLabsTtsProvider, createTtsProviderFromEnv };
-export type { TtsProvider, TtsOptions };
+export type { TtsProvider, TtsOptions, TtsSynthesisResult };

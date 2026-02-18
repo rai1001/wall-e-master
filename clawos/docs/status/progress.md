@@ -90,13 +90,29 @@ Last update: 2026-02-18
    - `/projects` now includes `Mapa de Conocimiento` card with plain-language cluster summary
    - displays agent nodes, connected findings, and per-agent handoff counts
    - E2E coverage validates cluster rendering from graph payload
+23. Durable core data stores (memory, knowledge, costs):
+   - memory chunks now persist to disk (`CLAWOS_MEMORY_PATH|CLAWOS_MEMORY_DIR`)
+   - knowledge handoff feed/graph now persist to disk (`CLAWOS_KNOWLEDGE_PATH|CLAWOS_KNOWLEDGE_DIR`)
+   - cost summaries/budgets now persist to disk (`CLAWOS_COSTS_PATH|CLAWOS_COSTS_DIR`)
+   - regression tests validate restart persistence for all three stores
+24. Voice output persistence:
+   - `/api/voice/process` now stores synthesized audio to disk
+   - new route `GET /api/voice/output/:fileName` streams persisted mp3 files
+   - voice output path configurable via `CLAWOS_VOICE_OUTPUT_DIR`
+   - regression test validates file generation and retrieval
+25. Error taxonomy completion across middleware routes:
+   - all remaining validation/not-found route errors migrated to `buildErrorResponse`
+   - taxonomy test validates `details.taxonomy` consistency across agents/handoff/knowledge/projects
+26. Real OpenClaw websocket bridge capability:
+   - `ClientStream` now uses real websocket transport (`ws` package)
+   - `OpenClawBridge.ensureConnected()` supports live daemon connection checks
+   - `/api/projects/status?probe=true` exposes bridge connectivity status
 
 ## In Progress
 
-1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Extend taxonomy coverage to all remaining middleware routes
+1. None
 
 ## Next (Guide-Aligned)
 
-1. Extend taxonomy coverage to all remaining middleware routes
-2. Voice provider persistence for generated audio files
+1. Optional: introduce LanceDB adapter as storage backend while preserving current API contracts
+2. Optional: wire token-accurate cost accounting from model/provider usage telemetry

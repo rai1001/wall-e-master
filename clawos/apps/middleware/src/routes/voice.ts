@@ -3,9 +3,11 @@ import { Router } from "express";
 import { buildErrorResponse } from "../services/observability";
 import { createSttProviderFromEnv } from "../services/stt-provider";
 import { createTtsProviderFromEnv } from "../services/tts-provider";
+import { VoiceAudioStore } from "../services/voice-audio-store";
 
 const voiceRouter = Router();
 const MAX_AUDIO_BYTES = 512_000;
+const voiceAudioStore = new VoiceAudioStore();
 
 voiceRouter.post("/process", async (req, res) => {
   const payload = req.body ?? {};
@@ -65,14 +67,15 @@ voiceRouter.post("/process", async (req, res) => {
 
   try {
     const transcript = await sttProvider.transcribe(audioBuffer);
-    const ttsAudioUrl = await ttsProvider.synthesize("Current status summary generated", {
+    const synthesis = await ttsProvider.synthesize("Current status summary generated", {
       voiceId
     });
+    const stored = voiceAudioStore.saveMp3(synthesis.audioBuffer);
 
     return res.status(200).json({
       transcript,
       agent_response: "Current status summary generated",
-      tts_audio_url: ttsAudioUrl
+      tts_audio_url: stored.url
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Voice provider request failed.";
@@ -82,6 +85,21 @@ voiceRouter.post("/process", async (req, res) => {
       })
     );
   }
+});
+
+voiceRouter.get("/output/:fileName", (req, res) => {
+  const fileName = String(req.params.fileName ?? "");
+  const audio = voiceAudioStore.readMp3(fileName);
+  if (!audio) {
+    return res.status(404).json(
+      buildErrorResponse("not_found", "Voice output file not found", {
+        recovery_action: "Generate a new voice response and retry."
+      })
+    );
+  }
+
+  res.setHeader("Content-Type", "audio/mpeg");
+  return res.status(200).send(audio);
 });
 
 export { voiceRouter };

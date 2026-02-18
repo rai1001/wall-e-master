@@ -22,13 +22,11 @@ agentsRouter.post("/spawn", (req, res) => {
     !Array.isArray(skills) ||
     (memory_access !== "global" && memory_access !== "private")
   ) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "Invalid spawn payload",
-        details: {}
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "Invalid spawn payload", {
+        recovery_action: "Provide name, role, voice_id, skills[], and memory_access (global|private)."
+      })
+    );
   }
 
   const result = agentFactory.spawn({
@@ -55,24 +53,20 @@ agentsRouter.patch("/:agentId/status", (req, res) => {
   const status = req.body?.status;
 
   if (status !== "idle" && status !== "busy" && status !== "sleeping") {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "Invalid status value",
-        details: {}
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "Invalid status value", {
+        recovery_action: "Use one of: idle, busy, sleeping."
+      })
+    );
   }
 
   const updated = agentRegistry.updateStatus(agentId, status);
   if (!updated) {
-    return res.status(404).json({
-      error: {
-        code: "not_found",
-        message: "Agent not found",
-        details: {}
-      }
-    });
+    return res.status(404).json(
+      buildErrorResponse("not_found", "Agent not found", {
+        recovery_action: "List agents and use a valid agentId."
+      })
+    );
   }
 
   return res.status(200).json({
@@ -86,13 +80,11 @@ agentsRouter.patch("/:agentId/permissions", (req, res) => {
   const skillsInput = req.body?.skills;
 
   if ((memoryAccess !== "global" && memoryAccess !== "private") || !Array.isArray(skillsInput)) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "Invalid permissions payload",
-        details: {}
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "Invalid permissions payload", {
+        recovery_action: "Provide skills[] and memory_access (global|private)."
+      })
+    );
   }
 
   const skills = skillsInput
@@ -100,13 +92,11 @@ agentsRouter.patch("/:agentId/permissions", (req, res) => {
     .filter((value: string) => value.length > 0);
 
   if (skills.length === 0) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "At least one skill is required",
-        details: {}
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "At least one skill is required", {
+        recovery_action: "Select one or more skills before saving permissions."
+      })
+    );
   }
 
   const approvalHeader = String(req.header("x-clawos-global-memory-approved") ?? "").trim().toLowerCase();
@@ -131,13 +121,11 @@ agentsRouter.patch("/:agentId/permissions", (req, res) => {
 
   const updated = agentRegistry.updatePermissions(agentId, skills, memoryAccess);
   if (!updated) {
-    return res.status(404).json({
-      error: {
-        code: "not_found",
-        message: "Agent not found",
-        details: {}
-      }
-    });
+    return res.status(404).json(
+      buildErrorResponse("not_found", "Agent not found", {
+        recovery_action: "List agents and use a valid agentId."
+      })
+    );
   }
 
   return res.status(200).json({

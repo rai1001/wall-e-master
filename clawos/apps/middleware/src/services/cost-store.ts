@@ -1,3 +1,6 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+
 interface AgentCostSummary {
   agent_id: string;
   name: string;
@@ -58,10 +61,20 @@ function buildControlActions(status: CostStatus): string[] {
 }
 
 class CostStore {
+  private readonly storagePath?: string;
   private readonly projectStates = new Map<string, ProjectCostState>();
 
-  constructor() {
-    this.projectStates.set("proj_001", {
+  constructor(storagePath?: string) {
+    this.storagePath = storagePath;
+    const loadedStates = this.loadStates();
+    if (loadedStates.length > 0) {
+      for (const state of loadedStates) {
+        this.projectStates.set(state.project_id, state);
+      }
+      return;
+    }
+
+    const seedState: ProjectCostState = {
       project_id: "proj_001",
       budget_usd: 20,
       agents: [
@@ -82,7 +95,10 @@ class CostStore {
           last_activity: new Date().toISOString()
         }
       ]
-    });
+    };
+
+    this.projectStates.set(seedState.project_id, seedState);
+    this.persistStates();
   }
 
   getSummary(projectId: string): ProjectCostSummary {
@@ -95,6 +111,7 @@ class CostStore {
     const normalizedProjectId = projectId.trim();
     const state = this.getOrCreateState(normalizedProjectId);
     state.budget_usd = roundCurrency(budgetUsd);
+    this.persistStates();
     return this.toSummary(state);
   }
 
@@ -119,7 +136,93 @@ class CostStore {
       ]
     };
     this.projectStates.set(projectId, created);
+    this.persistStates();
     return created;
+  }
+
+  private resolveStoragePath(): string {
+    if (this.storagePath?.trim()) {
+      return this.storagePath;
+    }
+
+    const explicitPath = process.env.CLAWOS_COSTS_PATH?.trim();
+    if (explicitPath) {
+      return explicitPath;
+    }
+
+    const baseDir = process.env.CLAWOS_COSTS_DIR?.trim() ?? join(process.cwd(), "workspace", "costs");
+    return join(baseDir, "cost-store.json");
+  }
+
+  private loadStates(): ProjectCostState[] {
+    const path = this.resolveStoragePath();
+    if (!existsSync(path)) {
+      return [];
+    }
+
+    try {
+      const raw = readFileSync(path, "utf8");
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      const states: ProjectCostState[] = [];
+      for (const value of parsed) {
+        if (!value || typeof value !== "object") {
+          continue;
+        }
+
+        const row = value as Record<string, unknown>;
+        if (typeof row.project_id !== "string" || typeof row.budget_usd !== "number" || !Array.isArray(row.agents)) {
+          continue;
+        }
+
+        const agents: AgentCostSummary[] = [];
+        for (const agentValue of row.agents) {
+          if (!agentValue || typeof agentValue !== "object") {
+            continue;
+          }
+
+          const agent = agentValue as Record<string, unknown>;
+          if (
+            typeof agent.agent_id !== "string" ||
+            typeof agent.name !== "string" ||
+            typeof agent.tokens_in !== "number" ||
+            typeof agent.tokens_out !== "number" ||
+            typeof agent.estimated_usd !== "number" ||
+            typeof agent.last_activity !== "string"
+          ) {
+            continue;
+          }
+
+          agents.push({
+            agent_id: agent.agent_id,
+            name: agent.name,
+            tokens_in: agent.tokens_in,
+            tokens_out: agent.tokens_out,
+            estimated_usd: agent.estimated_usd,
+            last_activity: agent.last_activity
+          });
+        }
+
+        states.push({
+          project_id: row.project_id,
+          budget_usd: row.budget_usd,
+          agents
+        });
+      }
+
+      return states;
+    } catch {
+      return [];
+    }
+  }
+
+  private persistStates(): void {
+    const path = this.resolveStoragePath();
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, JSON.stringify(Array.from(this.projectStates.values()), null, 2), "utf8");
   }
 
   private toSummary(state: ProjectCostState): ProjectCostSummary {

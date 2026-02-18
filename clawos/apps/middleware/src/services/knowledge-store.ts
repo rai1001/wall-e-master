@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 interface HandoffEvent {
   id: string;
@@ -10,7 +12,13 @@ interface HandoffEvent {
 }
 
 class KnowledgeStore {
+  private readonly storagePath?: string;
   private readonly handoffs: HandoffEvent[] = [];
+
+  constructor(storagePath?: string) {
+    this.storagePath = storagePath;
+    this.handoffs.push(...this.loadHandoffs());
+  }
 
   addHandoff(input: Omit<HandoffEvent, "id" | "timestamp">): HandoffEvent {
     const event: HandoffEvent = {
@@ -20,6 +28,7 @@ class KnowledgeStore {
     };
 
     this.handoffs.push(event);
+    this.persistHandoffs();
     return event;
   }
 
@@ -50,9 +59,77 @@ class KnowledgeStore {
       edges
     };
   }
+
+  private resolveStoragePath(): string {
+    if (this.storagePath?.trim()) {
+      return this.storagePath;
+    }
+
+    const explicitPath = process.env.CLAWOS_KNOWLEDGE_PATH?.trim();
+    if (explicitPath) {
+      return explicitPath;
+    }
+
+    const baseDir = process.env.CLAWOS_KNOWLEDGE_DIR?.trim() ?? join(process.cwd(), "workspace", "knowledge");
+    return join(baseDir, "knowledge-store.json");
+  }
+
+  private loadHandoffs(): HandoffEvent[] {
+    const path = this.resolveStoragePath();
+    if (!existsSync(path)) {
+      return [];
+    }
+
+    try {
+      const raw = readFileSync(path, "utf8");
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      const rows: HandoffEvent[] = [];
+      for (const value of parsed) {
+        if (!value || typeof value !== "object") {
+          continue;
+        }
+
+        const row = value as Record<string, unknown>;
+        if (
+          typeof row.id !== "string" ||
+          typeof row.project_id !== "string" ||
+          typeof row.from_agent_id !== "string" ||
+          typeof row.to_agent_id !== "string" ||
+          typeof row.content !== "string" ||
+          typeof row.timestamp !== "string"
+        ) {
+          continue;
+        }
+
+        rows.push({
+          id: row.id,
+          project_id: row.project_id,
+          from_agent_id: row.from_agent_id,
+          to_agent_id: row.to_agent_id,
+          content: row.content,
+          timestamp: row.timestamp
+        });
+      }
+
+      return rows;
+    } catch {
+      return [];
+    }
+  }
+
+  private persistHandoffs(): void {
+    const path = this.resolveStoragePath();
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, JSON.stringify(this.handoffs, null, 2), "utf8");
+  }
 }
 
 const knowledgeStore = new KnowledgeStore();
 
 export { knowledgeStore };
+export { KnowledgeStore };
 export type { HandoffEvent };

@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 interface MemorySearchResult {
   id: string;
@@ -29,36 +31,50 @@ interface MemoryIngestInput {
 }
 
 class MemoryStore {
-  private readonly rows: MemorySearchResult[] = [
-    {
-      id: randomUUID(),
-      content: "User prefers React over Vue for frontend work",
-      score: 0.89,
-      priority_score: 8,
-      access_count: 0,
-      metadata: {
-        agent_id: "sastre-coder",
-        project_id: "proj_001",
-        source: "chat",
-        timestamp: new Date().toISOString(),
-        tags: ["preferences", "frontend"]
-      }
-    },
-    {
-      id: randomUUID(),
-      content: "OpenClaw websocket daemon runs on 127.0.0.1:18789",
-      score: 0.86,
-      priority_score: 9,
-      access_count: 0,
-      metadata: {
-        agent_id: "lince",
-        project_id: "proj_001",
-        source: "system",
-        timestamp: new Date().toISOString(),
-        tags: ["openclaw", "websocket"]
-      }
+  private readonly storagePath?: string;
+  private readonly rows: MemorySearchResult[];
+
+  constructor(storagePath?: string) {
+    this.storagePath = storagePath;
+    const loaded = this.loadRows();
+    if (loaded.length > 0) {
+      this.rows = loaded;
+      return;
     }
-  ];
+
+    this.rows = [
+      {
+        id: randomUUID(),
+        content: "User prefers React over Vue for frontend work",
+        score: 0.89,
+        priority_score: 8,
+        access_count: 0,
+        metadata: {
+          agent_id: "sastre-coder",
+          project_id: "proj_001",
+          source: "chat",
+          timestamp: new Date().toISOString(),
+          tags: ["preferences", "frontend"]
+        }
+      },
+      {
+        id: randomUUID(),
+        content: "OpenClaw websocket daemon runs on 127.0.0.1:18789",
+        score: 0.86,
+        priority_score: 9,
+        access_count: 0,
+        metadata: {
+          agent_id: "lince",
+          project_id: "proj_001",
+          source: "system",
+          timestamp: new Date().toISOString(),
+          tags: ["openclaw", "websocket"]
+        }
+      }
+    ];
+
+    this.persistRows();
+  }
 
   add(input: MemoryIngestInput): string {
     const id = randomUUID();
@@ -80,6 +96,7 @@ class MemoryStore {
     };
 
     this.rows.push(record);
+    this.persistRows();
     return id;
   }
 
@@ -96,6 +113,7 @@ class MemoryStore {
     for (const row of results) {
       row.access_count += 1;
     }
+    this.persistRows();
 
     return results;
   }
@@ -109,7 +127,94 @@ class MemoryStore {
     row.priority_score = Math.min(15, row.priority_score + 3);
     row.score = Math.min(0.99, row.score + 0.05);
     row.pinned = true;
+    this.persistRows();
     return row;
+  }
+
+  private resolveStoragePath(): string {
+    if (this.storagePath?.trim()) {
+      return this.storagePath;
+    }
+
+    const explicitPath = process.env.CLAWOS_MEMORY_PATH?.trim();
+    if (explicitPath) {
+      return explicitPath;
+    }
+
+    const baseDir = process.env.CLAWOS_MEMORY_DIR?.trim() ?? join(process.cwd(), "workspace", "memory");
+    return join(baseDir, "memory-store.json");
+  }
+
+  private loadRows(): MemorySearchResult[] {
+    const path = this.resolveStoragePath();
+    if (!existsSync(path)) {
+      return [];
+    }
+
+    try {
+      const raw = readFileSync(path, "utf8");
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      const rows: MemorySearchResult[] = [];
+      for (const value of parsed) {
+        if (!value || typeof value !== "object") {
+          continue;
+        }
+
+        const row = value as Record<string, unknown>;
+        if (
+          typeof row.id !== "string" ||
+          typeof row.content !== "string" ||
+          typeof row.score !== "number" ||
+          typeof row.priority_score !== "number" ||
+          typeof row.access_count !== "number" ||
+          !row.metadata ||
+          typeof row.metadata !== "object"
+        ) {
+          continue;
+        }
+
+        const metadata = row.metadata as Record<string, unknown>;
+        if (
+          typeof metadata.agent_id !== "string" ||
+          typeof metadata.project_id !== "string" ||
+          typeof metadata.source !== "string" ||
+          typeof metadata.timestamp !== "string" ||
+          !Array.isArray(metadata.tags)
+        ) {
+          continue;
+        }
+
+        rows.push({
+          id: row.id,
+          content: row.content,
+          score: row.score,
+          priority_score: row.priority_score,
+          access_count: row.access_count,
+          pinned: row.pinned === true,
+          metadata: {
+            agent_id: metadata.agent_id,
+            project_id: metadata.project_id,
+            source: metadata.source,
+            timestamp: metadata.timestamp,
+            tags: metadata.tags.map((tag) => String(tag))
+          }
+        });
+      }
+
+      return rows;
+    } catch {
+      return [];
+    }
+  }
+
+  private persistRows(): void {
+    const path = this.resolveStoragePath();
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, JSON.stringify(this.rows, null, 2), "utf8");
   }
 }
 

@@ -16,13 +16,21 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 5. Agent registry persistence path configured (optional):
    - `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
-6. Observability persistence path configured (optional but recommended):
+6. Shared memory persistence path configured (optional but recommended):
+   - `CLAWOS_MEMORY_PATH` or `CLAWOS_MEMORY_DIR`
+7. Knowledge feed/graph persistence path configured (optional but recommended):
+   - `CLAWOS_KNOWLEDGE_PATH` or `CLAWOS_KNOWLEDGE_DIR`
+8. Cost summary persistence path configured (optional but recommended):
+   - `CLAWOS_COSTS_PATH` or `CLAWOS_COSTS_DIR`
+9. Observability persistence path configured (optional but recommended):
    - `CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`
-7. Remote access posture inputs configured (recommended):
+10. Voice output persistence path configured (optional but recommended):
+   - `CLAWOS_VOICE_OUTPUT_DIR`
+11. Remote access posture inputs configured (recommended):
    - `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
    - `REMOTE_ACCESS_PROVIDER=none|tailscale|cloudflare`
    - `TAILSCALE_FUNNEL_URL` or `CLOUDFLARE_TUNNEL_URL` when provider is enabled
-8. Optional policy hardening:
+12. Optional policy hardening:
    - `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true` to require explicit header before global memory elevation
 
 ## Startup
@@ -50,6 +58,7 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
    - `GET /health/ready` should return `200`
 3. Protected endpoint check:
    - `GET /api/projects/status?project_id=proj_001` without token should return `401`
+   - optional bridge probe: `GET /api/projects/status?project_id=proj_001&probe=true` should show `bridge.connected=true` when daemon is reachable
 4. Security checklist check:
    - `GET /api/security/checklist` with token should return `200` and actionable `checks[]`
 5. Cost summary check:
@@ -90,6 +99,7 @@ Actions:
    - `ELEVENLABS_API_KEY` for ElevenLabs TTS
 2. check payload size and format
 3. confirm provider network access
+4. verify `CLAWOS_VOICE_OUTPUT_DIR` is writable and `GET /api/voice/output/<file>.mp3` returns `200`
 
 ### 3. Memory search returns empty results
 
@@ -97,6 +107,14 @@ Actions:
 1. verify ingest path is writing records
 2. verify query includes expected project scope
 3. inspect metadata tags and source values
+4. verify `CLAWOS_MEMORY_PATH`/`CLAWOS_MEMORY_DIR` points to persistent writable storage
+
+### 3.1. Knowledge feed/graph is empty after restart
+
+Actions:
+1. verify `CLAWOS_KNOWLEDGE_PATH`/`CLAWOS_KNOWLEDGE_DIR` is configured and writable
+2. create a test handoff with `POST /api/agents/handoff`
+3. validate `GET /api/knowledge/feed?project_id=<id>` returns persisted entries
 
 ### 4. Agents disappear after middleware restart
 
@@ -126,6 +144,7 @@ Actions:
 1. call `GET /api/costs/summary?project_id=<id>` and identify top spending agents
 2. apply mitigation from `control_actions[]`
 3. if needed, update budget with `PATCH /api/costs/summary`
+4. confirm `CLAWOS_COSTS_PATH`/`CLAWOS_COSTS_DIR` persists budget updates after restart
 
 ### 8. Observability `alert_status=critical`
 
@@ -148,6 +167,13 @@ Actions:
 1. verify `CLAWOS_OBSERVABILITY_PATH` (or `CLAWOS_OBSERVABILITY_DIR`) points to persistent writable storage
 2. check whether `observability-counters.json` is created after API traffic
 3. avoid ephemeral temp folders or container layers if long-term visibility is required
+
+### 11. Project status shows bridge disconnected
+
+Actions:
+1. call `GET /api/projects/status?project_id=<id>&probe=true`
+2. verify OpenClaw daemon is reachable on `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
+3. verify local firewall/network policy allows localhost websocket connection
 
 ## Deployment Safety
 

@@ -353,9 +353,36 @@ Response `503` (provider configuration):
 }
 ```
 
+### `GET /api/voice/output/:file_name`
+
+Return persisted synthesized audio from disk (`audio/mpeg`).
+
+Response `200`:
+
+- Binary MP3 stream
+
+Response `404`:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Voice output file not found",
+    "details": {
+      "taxonomy": "resource",
+      "recovery_action": "Generate a new voice response and retry."
+    }
+  }
+}
+```
+
 ### `GET /api/projects/status?project_id=<id>`
 
 Return consolidated status across all sub-agents.
+
+Optional query:
+
+- `probe=true` attempts live websocket connection check to OpenClaw daemon.
 
 Response `200`:
 
@@ -371,6 +398,10 @@ Response `200`:
     "todo": 12,
     "doing": 4,
     "done": 18
+  },
+  "bridge": {
+    "ws_url": "ws://127.0.0.1:18789",
+    "connected": true
   },
   "updated_at": "2026-02-18T00:00:00Z"
 }

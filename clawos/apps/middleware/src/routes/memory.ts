@@ -35,13 +35,11 @@ memoryRouter.post("/ingest", (req, res) => {
     typeof metadata.project_id !== "string" ||
     typeof metadata.source !== "string"
   ) {
-    return res.status(400).json({
-      error: {
-        code: "validation_error",
-        message: "Invalid memory ingest payload",
-        details: {}
-      }
-    });
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "Invalid memory ingest payload", {
+        recovery_action: "Provide content and metadata with agent_id, project_id, and source."
+      })
+    );
   }
 
   const result = memoryEventBus.ingest({

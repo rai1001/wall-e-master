@@ -166,6 +166,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MemoryIngestResponse"
+        "400":
+          description: Invalid ingest payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /memory/pin:
     post:
       summary: Pin memory to increase global retrieval priority
@@ -210,6 +216,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HandoffResponse"
+        "400":
+          description: Invalid handoff payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /voice/process:
     post:
       summary: Process voice input and return transcript plus response
@@ -256,6 +268,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /voice/output/{fileName}:
+    get:
+      summary: Stream persisted TTS output audio file
+      parameters:
+        - in: path
+          name: fileName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Audio output stream (mp3)
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Voice output file not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /projects/status:
     get:
       summary: Consolidated project status
@@ -265,6 +300,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: probe
+          required: false
+          schema:
+            type: boolean
+          description: When true, middleware attempts live websocket probe to OpenClaw daemon.
       responses:
         "200":
           description: Project status
@@ -272,6 +313,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectStatusResponse"
+        "400":
+          description: Invalid project query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /costs/summary:
     get:
       summary: Cost summary by project and agent
@@ -360,6 +407,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KnowledgeFeedResponse"
+        "400":
+          description: Missing project_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /knowledge/graph:
     get:
       summary: Graph data for agents and findings
@@ -376,6 +429,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KnowledgeGraphResponse"
+        "400":
+          description: Missing project_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   securitySchemes:
@@ -654,6 +713,13 @@ components:
           type: object
           additionalProperties:
             type: integer
+        bridge:
+          type: object
+          properties:
+            ws_url:
+              type: string
+            connected:
+              type: boolean
         updated_at:
           type: string
           format: date-time

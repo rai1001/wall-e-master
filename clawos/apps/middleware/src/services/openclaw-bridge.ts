@@ -4,6 +4,7 @@ import { buildSharedSystemPrompt } from "../prompts/shared-system-prompt";
 interface OpenClawBridgeOptions {
   url: string;
   reconnectAttempts?: number;
+  connectTimeoutMs?: number;
 }
 
 interface RecoveryState {
@@ -37,6 +38,22 @@ class OpenClawBridge {
     return this.options.url;
   }
 
+  isConnected(): boolean {
+    return this.stream.isConnected();
+  }
+
+  async ensureConnected(): Promise<boolean> {
+    if (this.stream.isConnected()) {
+      return true;
+    }
+
+    return this.stream.connect(this.options.url, this.options.connectTimeoutMs ?? 1_500);
+  }
+
+  disconnect(): void {
+    this.stream.disconnect();
+  }
+
   buildAgentRequest(input: AgentRequestInput): AgentRequest {
     return {
       systemPrompt: buildSharedSystemPrompt({
@@ -52,14 +69,14 @@ class OpenClawBridge {
   async simulateDisconnectAndRecover(): Promise<RecoveryState> {
     const maxAttempts = this.options.reconnectAttempts ?? 3;
 
-    this.stream.connect();
+    await this.ensureConnected();
     this.stream.disconnect();
 
     let attempts = 0;
     while (!this.stream.isConnected() && attempts < maxAttempts) {
       attempts += 1;
       await this.delay(5 * attempts);
-      this.stream.connect();
+      await this.ensureConnected();
     }
 
     return {

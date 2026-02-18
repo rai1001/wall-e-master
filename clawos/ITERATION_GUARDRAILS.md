@@ -235,3 +235,13 @@ Risks: Current cluster logic depends on `hands_off` relations and may underrepre
 Validation done: pnpm --filter @clawos/web test:e2e tests/knowledge-map.spec.ts; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/api/knowledge/graph` web proxy and `Mapa de Conocimiento` card with agent/finding counts and per-agent shared-handoff totals.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Close remaining middleware/platform gaps (durable stores, real bridge transport, voice output persistence, full taxonomy coverage).
+Phase: Phase 1, Phase 3, and Phase 4
+Rules checked: 2, 3, 6, 7, 8
+Risks: Durable stores currently use JSON files; teams requiring high-volume vector indexing should migrate to LanceDB adapter for scale.
+Validation done: pnpm --filter @clawos/middleware test durable.stores.test.ts voice.output.persistence.test.ts taxonomy.coverage.test.ts openclaw.bridge.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
+Outcome: Implemented persistence for memory/knowledge/cost stores, live websocket client transport, persisted TTS output route, and taxonomy-consistent error envelopes across remaining routes.
+```
