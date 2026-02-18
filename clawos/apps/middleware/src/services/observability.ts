@@ -1,3 +1,6 @@
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+
 type ErrorTaxonomy = "auth" | "validation" | "policy" | "resource" | "throttle" | "dependency" | "availability" | "unknown";
 
 interface SecurityEventInput {
@@ -18,6 +21,11 @@ interface CounterSummary {
   count: number;
 }
 
+interface PersistedObservabilityState {
+  version: number;
+  counter_rows: CounterRow[];
+}
+
 const ERROR_TAXONOMY_MAP: Record<string, ErrorTaxonomy> = {
   unauthorized: "auth",
   validation_error: "validation",
@@ -32,24 +40,124 @@ const ERROR_TAXONOMY_MAP: Record<string, ErrorTaxonomy> = {
 
 const SENSITIVE_KEY_PATTERNS = [/authorization/i, /token/i, /api[_-]?key/i, /secret/i, /password/i, /audio_base64/i];
 const MAX_RETENTION_MS = 24 * 60 * 60 * 1000;
+const OBSERVABILITY_FILE_NAME = "observability-counters.json";
+const PERSISTED_SCHEMA_VERSION = 1;
 const counterRows: CounterRow[] = [];
+let hasLoadedPersistedState = false;
 
-function pruneCounters(now: number): void {
+function resolveStoragePath(): string {
+  const explicitPath = process.env.CLAWOS_OBSERVABILITY_PATH?.trim();
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const explicitDir = process.env.CLAWOS_OBSERVABILITY_DIR?.trim();
+  if (explicitDir) {
+    return join(explicitDir, OBSERVABILITY_FILE_NAME);
+  }
+
+  return join(process.cwd(), "workspace", "observability", OBSERVABILITY_FILE_NAME);
+}
+
+function parseCounterRow(value: unknown): CounterRow | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const row = value as Record<string, unknown>;
+  if (
+    (row.kind !== "security_event" && row.kind !== "error_taxonomy") ||
+    typeof row.key !== "string" ||
+    row.key.trim().length === 0 ||
+    typeof row.timestamp !== "number" ||
+    !Number.isFinite(row.timestamp)
+  ) {
+    return null;
+  }
+
+  return {
+    kind: row.kind,
+    key: row.key,
+    timestamp: row.timestamp
+  };
+}
+
+function pruneCounters(now: number): boolean {
   const minTimestamp = now - MAX_RETENTION_MS;
   let writeIndex = 0;
+  let changed = false;
 
   for (let readIndex = 0; readIndex < counterRows.length; readIndex += 1) {
     const row = counterRows[readIndex];
     if (row.timestamp >= minTimestamp) {
       counterRows[writeIndex] = row;
       writeIndex += 1;
+    } else {
+      changed = true;
     }
   }
 
+  if (writeIndex !== counterRows.length) {
+    changed = true;
+  }
   counterRows.length = writeIndex;
+  return changed;
+}
+
+function persistCounters(): void {
+  const storagePath = resolveStoragePath();
+  const payload: PersistedObservabilityState = {
+    version: PERSISTED_SCHEMA_VERSION,
+    counter_rows: counterRows
+  };
+
+  mkdirSync(dirname(storagePath), { recursive: true });
+  writeFileSync(storagePath, JSON.stringify(payload, null, 2), "utf8");
+}
+
+function loadCountersIfNeeded(): void {
+  if (hasLoadedPersistedState) {
+    return;
+  }
+
+  hasLoadedPersistedState = true;
+  const storagePath = resolveStoragePath();
+
+  if (!existsSync(storagePath)) {
+    return;
+  }
+
+  try {
+    const raw = readFileSync(storagePath, "utf8");
+    const parsed = JSON.parse(raw) as unknown;
+
+    const rows =
+      Array.isArray(parsed)
+        ? parsed
+        : parsed &&
+            typeof parsed === "object" &&
+            Array.isArray((parsed as Record<string, unknown>).counter_rows)
+          ? ((parsed as Record<string, unknown>).counter_rows as unknown[])
+          : [];
+
+    for (const row of rows) {
+      const parsedRow = parseCounterRow(row);
+      if (parsedRow) {
+        counterRows.push(parsedRow);
+      }
+    }
+
+    const wasPruned = pruneCounters(Date.now());
+    if (wasPruned) {
+      persistCounters();
+    }
+  } catch {
+    counterRows.length = 0;
+  }
 }
 
 function recordCounter(kind: CounterRow["kind"], key: string): void {
+  loadCountersIfNeeded();
   const now = Date.now();
   pruneCounters(now);
   counterRows.push({
@@ -57,6 +165,7 @@ function recordCounter(kind: CounterRow["kind"], key: string): void {
     key,
     timestamp: now
   });
+  persistCounters();
 }
 
 function countByKey(rows: CounterRow[]): CounterSummary[] {
@@ -150,9 +259,13 @@ function getObservabilitySummary(windowMinutes: number): {
   alert_status: "nominal" | "watch" | "critical";
   alerts: string[];
 } {
+  loadCountersIfNeeded();
   const normalizedWindow = Math.max(1, Math.min(windowMinutes, 24 * 60));
   const now = Date.now();
-  pruneCounters(now);
+  const wasPruned = pruneCounters(now);
+  if (wasPruned) {
+    persistCounters();
+  }
 
   const minTimestamp = now - normalizedWindow * 60_000;
   const windowRows = counterRows.filter((row) => row.timestamp >= minTimestamp);
@@ -200,8 +313,19 @@ function getObservabilitySummary(windowMinutes: number): {
   };
 }
 
-function resetObservabilityStore(): void {
+function resetObservabilityStore(options: { clearPersisted?: boolean } = {}): void {
+  const clearPersisted = options.clearPersisted ?? true;
   counterRows.length = 0;
+  hasLoadedPersistedState = false;
+
+  if (clearPersisted) {
+    const storagePath = resolveStoragePath();
+    try {
+      rmSync(storagePath, { force: true });
+    } catch {
+      // ignore cleanup errors in test/reset utility
+    }
+  }
 }
 
 export {

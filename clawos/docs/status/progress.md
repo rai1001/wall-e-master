@@ -80,6 +80,11 @@ Last update: 2026-02-18
    - web proxy route `POST /api/memory/pin`
    - chat results now include `Fijar en memoria global` action
    - middleware and E2E tests cover pin success and not-found behavior
+21. Durable observability counters:
+   - observability counter events now persist to disk and survive middleware restarts
+   - configurable storage path via `CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`
+   - retention pruning now applies to persisted data (24h window)
+   - persistence regression test validates module restart/reload behavior
 
 ## In Progress
 
@@ -88,5 +93,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Persist observability counters to durable storage
-2. Add memory cluster/map visualization for non-technical navigation
+1. Add memory cluster/map visualization for non-technical navigation
+2. Extend taxonomy coverage to all remaining middleware routes

@@ -16,11 +16,13 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 5. Agent registry persistence path configured (optional):
    - `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
-6. Remote access posture inputs configured (recommended):
+6. Observability persistence path configured (optional but recommended):
+   - `CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`
+7. Remote access posture inputs configured (recommended):
    - `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
    - `REMOTE_ACCESS_PROVIDER=none|tailscale|cloudflare`
    - `TAILSCALE_FUNNEL_URL` or `CLOUDFLARE_TUNNEL_URL` when provider is enabled
-7. Optional policy hardening:
+8. Optional policy hardening:
    - `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true` to require explicit header before global memory elevation
 
 ## Startup
@@ -131,6 +133,7 @@ Actions:
 1. call `GET /api/observability/summary?window_minutes=60`
 2. review `alerts[]` and top counters (`security_event_counters`, `error_taxonomy_counters`)
 3. prioritize auth/policy/rate-limit anomalies before feature work
+4. verify observability persistence path is writable (`CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`)
 
 ### 9. Memory pinning action fails in chat
 
@@ -138,6 +141,13 @@ Actions:
 1. verify `POST /api/memory/pin` responds `200` for the selected `memory_id`
 2. if `404`, rerun memory search and use a valid chunk id
 3. confirm middleware process is running and reachable from web proxy
+
+### 10. Observability counters reset after restart
+
+Actions:
+1. verify `CLAWOS_OBSERVABILITY_PATH` (or `CLAWOS_OBSERVABILITY_DIR`) points to persistent writable storage
+2. check whether `observability-counters.json` is created after API traffic
+3. avoid ephemeral temp folders or container layers if long-term visibility is required
 
 ## Deployment Safety
 

@@ -215,3 +215,13 @@ Risks: Pinning is in-memory in current store; reinforcement persistence across p
 Validation done: pnpm --filter @clawos/middleware test memory.pin.test.ts; pnpm --filter @clawos/web test:e2e tests/memory-pin.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added middleware + web pin route and chat action to fix key findings into global memory context.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Persist observability counters to durable storage across middleware restarts.
+Phase: Phase 4
+Rules checked: 2, 7, 8
+Risks: Persistence relies on local filesystem write access; misconfigured paths can silently reduce historical visibility.
+Validation done: pnpm --filter @clawos/middleware test observability.persistence.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
+Outcome: Observability service now loads/saves counters from disk (`CLAWOS_OBSERVABILITY_PATH`/`CLAWOS_OBSERVABILITY_DIR`) with retention pruning and restart persistence covered by regression test.
+```
