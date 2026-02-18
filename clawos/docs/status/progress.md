@@ -107,6 +107,11 @@ Last update: 2026-02-18
    - `ClientStream` now uses real websocket transport (`ws` package)
    - `OpenClawBridge.ensureConnected()` supports live daemon connection checks
    - `/api/projects/status?probe=true` exposes bridge connectivity status
+27. Technical-debt baseline cleanup:
+   - Next.js config now sets `outputFileTracingRoot` and `allowedDevOrigins`
+   - removed recurrent build/runtime warnings during local dev and CI-like checks
+   - OpenAPI contract now includes `operationId`, `license`, and required 4xx responses
+   - Redocly lint now passes with zero warnings
 
 ## In Progress
 

@@ -245,3 +245,13 @@ Risks: Durable stores currently use JSON files; teams requiring high-volume vect
 Validation done: pnpm --filter @clawos/middleware test durable.stores.test.ts voice.output.persistence.test.ts taxonomy.coverage.test.ts openclaw.bridge.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
 Outcome: Implemented persistence for memory/knowledge/cost stores, live websocket client transport, persisted TTS output route, and taxonomy-consistent error envelopes across remaining routes.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Reduce technical debt before next feature cycle.
+Phase: Phase 3 and Phase 4
+Rules checked: 2, 7, 8
+Risks: `allowedDevOrigins` currently enumerates localhost/127.0.0.1 ports and may need expansion if dev ports change.
+Validation done: pnpm --filter @clawos/web build; pnpm --filter @clawos/web test:e2e tests/smoke.spec.ts; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
+Outcome: Eliminated recurring Next.js warning noise via explicit config and brought OpenAPI lint quality to zero warnings by adding operationIds, license metadata, and missing 4xx responses.
+```

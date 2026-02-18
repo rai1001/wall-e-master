@@ -3,6 +3,9 @@ info:
   title: ClawOS Middleware API
   version: 0.2.0
   description: Contracts for agent orchestration, shared memory, voice processing, handoff, and project status.
+  license:
+    name: Proprietary
+    url: https://example.com/legal/clawos-license
 servers:
   - url: /api
 security:
@@ -10,6 +13,7 @@ security:
 paths:
   /agents/spawn:
     post:
+      operationId: spawnAgent
       summary: Create a sub-agent
       requestBody:
         required: true
@@ -32,6 +36,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /agents:
     get:
+      operationId: listAgents
       summary: List registered agents
       responses:
         "200":
@@ -40,8 +45,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AgentListResponse"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /agents/{agentId}/status:
     patch:
+      operationId: updateAgentStatus
       summary: Update status for one agent
       parameters:
         - in: path
@@ -76,6 +88,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /agents/{agentId}/permissions:
     patch:
+      operationId: updateAgentPermissions
       summary: Update permissions for one agent
       parameters:
         - in: path
@@ -123,6 +136,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /memory/search:
     get:
+      operationId: searchMemory
       summary: Hybrid search in shared memory
       parameters:
         - in: query
@@ -150,8 +164,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MemorySearchResponse"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /memory/ingest:
     post:
+      operationId: ingestMemory
       summary: Ingest a memory event
       requestBody:
         required: true
@@ -174,6 +195,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /memory/pin:
     post:
+      operationId: pinMemory
       summary: Pin memory to increase global retrieval priority
       requestBody:
         required: true
@@ -202,6 +224,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /agents/handoff:
     post:
+      operationId: handoffAgentContext
       summary: Transfer context from one agent to another
       requestBody:
         required: true
@@ -224,6 +247,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /voice/process:
     post:
+      operationId: processVoice
       summary: Process voice input and return transcript plus response
       requestBody:
         required: true
@@ -270,6 +294,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /voice/output/{fileName}:
     get:
+      operationId: getVoiceOutput
       summary: Stream persisted TTS output audio file
       parameters:
         - in: path
@@ -293,6 +318,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /projects/status:
     get:
+      operationId: getProjectStatus
       summary: Consolidated project status
       parameters:
         - in: query
@@ -321,6 +347,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /costs/summary:
     get:
+      operationId: getCostSummary
       summary: Cost summary by project and agent
       parameters:
         - in: query
@@ -335,7 +362,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectCostSummaryResponse"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     patch:
+      operationId: updateCostSummaryBudget
       summary: Update project budget and return recalculated summary
       requestBody:
         required: true
@@ -358,6 +392,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /security/checklist:
     get:
+      operationId: getSecurityChecklist
       summary: Automated remote-access security checklist
       responses:
         "200":
@@ -366,8 +401,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SecurityChecklistResponse"
+        "401":
+          description: Missing or invalid bearer token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /observability/summary:
     get:
+      operationId: getObservabilitySummary
       summary: Observability dashboard counters and alert status
       parameters:
         - in: query
@@ -393,6 +435,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /knowledge/feed:
     get:
+      operationId: getKnowledgeFeed
       summary: Global discovery feed entries
       parameters:
         - in: query
@@ -415,6 +458,7 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
   /knowledge/graph:
     get:
+      operationId: getKnowledgeGraph
       summary: Graph data for agents and findings
       parameters:
         - in: query
