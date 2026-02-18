@@ -9,10 +9,16 @@ const memoryEventBus = new MemoryEventBus(memoryStore);
 
 memoryRouter.get("/search", (req, res) => {
   const query = String(req.query.q ?? "");
-  const results = memoryStore.search(query);
+  const projectId = String(req.query.project_id ?? "");
+  const limitValue = Number(req.query.limit ?? 10);
+  const limit = Number.isFinite(limitValue) && limitValue > 0 ? Math.floor(limitValue) : 10;
+  const allResults = memoryStore.search(query);
+  const scopedResults = projectId ? allResults.filter((row) => row.metadata.project_id === projectId) : allResults;
+  const results = scopedResults.slice(0, Math.min(limit, 50));
 
   res.status(200).json({
     query,
+    project_id: projectId || undefined,
     results
   });
 });

@@ -105,3 +105,13 @@ Risks: External provider runtime depends on network and third-party availability
 Validation done: pnpm --filter @clawos/middleware test voice.providers.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added OpenAI STT and ElevenLabs TTS provider adapters with env-based selection, actionable 503 configuration errors, and updated runbook/contracts.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Replace web placeholders with live middleware-backed project/chat data.
+Phase: Phase 3
+Rules checked: 1, 2, 6, 7, 8
+Risks: Web app depends on local middleware availability; proxy routes return 503 recovery messages when middleware is offline.
+Validation done: pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added Next.js proxy API routes, connected Projects and Chat views to real middleware endpoints, and added E2E coverage for live data rendering.
+```

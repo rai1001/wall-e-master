@@ -21,11 +21,15 @@ Last update: 2026-02-18
    - `TTS_PROVIDER=mock|elevenlabs`
    - actionable `503` when provider keys are missing
    - optional `voice_id` override on `/api/voice/process`
+10. Live web data bindings:
+   - `Projects` page now reads `/api/projects/status` through Next.js proxy routes
+   - `Chat` now retrieves shared memory context via `/api/memory/search`
+   - project namespace filtering enforced in middleware memory search
 
 ## In Progress
 
-1. Live dashboard data bindings (replace placeholder status cards with middleware data)
-2. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
+1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
+2. Agent creation wizard with presets connected to `/api/agents/spawn`
 
 ## Next (Guide-Aligned)
 
