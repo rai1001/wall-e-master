@@ -35,11 +35,16 @@ Last update: 2026-02-18
    - web page `/agents` to list agents and actions dormir/despertar
    - Next.js proxy routes for list and status updates
    - middleware and E2E tests for full sleep/wake flow
+13. Agent permission editing flow:
+   - backend endpoint `PATCH /api/agents/:id/permissions`
+   - web `/agents` now edits skills and memory scope per agent
+   - Next.js proxy route for permission updates
+   - middleware and E2E tests for permission-save behavior
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Agent permission editing flow (skills/memory access updates after creation)
+2. Agent registry persistence across middleware restart
 
 ## Next (Guide-Aligned)
 

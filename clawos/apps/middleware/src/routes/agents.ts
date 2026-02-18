@@ -75,4 +75,49 @@ agentsRouter.patch("/:agentId/status", (req, res) => {
   });
 });
 
+agentsRouter.patch("/:agentId/permissions", (req, res) => {
+  const { agentId } = req.params;
+  const memoryAccess = req.body?.memory_access;
+  const skillsInput = req.body?.skills;
+
+  if ((memoryAccess !== "global" && memoryAccess !== "private") || !Array.isArray(skillsInput)) {
+    return res.status(400).json({
+      error: {
+        code: "validation_error",
+        message: "Invalid permissions payload",
+        details: {}
+      }
+    });
+  }
+
+  const skills = skillsInput
+    .map((value: unknown) => String(value).trim())
+    .filter((value: string) => value.length > 0);
+
+  if (skills.length === 0) {
+    return res.status(400).json({
+      error: {
+        code: "validation_error",
+        message: "At least one skill is required",
+        details: {}
+      }
+    });
+  }
+
+  const updated = agentRegistry.updatePermissions(agentId, skills, memoryAccess);
+  if (!updated) {
+    return res.status(404).json({
+      error: {
+        code: "not_found",
+        message: "Agent not found",
+        details: {}
+      }
+    });
+  }
+
+  return res.status(200).json({
+    agent: updated
+  });
+});
+
 export { agentsRouter };

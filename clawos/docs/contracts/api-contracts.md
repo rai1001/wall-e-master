@@ -95,6 +95,33 @@ Request:
 }
 ```
 
+### `PATCH /api/agents/:agent_id/permissions`
+
+Update skills and memory scope for an existing agent.
+
+Request:
+
+```json
+{
+  "skills": ["browser", "python"],
+  "memory_access": "global"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "agent": {
+    "id": "1f9f8f52-3308-4c8f-93be-9f812f4a8ccf",
+    "name": "Lince",
+    "skills": ["browser", "python"],
+    "memory_access": "global",
+    "status": "idle"
+  }
+}
+```
+
 Response `200`:
 
 ```json

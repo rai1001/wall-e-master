@@ -13,11 +13,20 @@ interface Agent {
   skills: string[];
 }
 
+interface PermissionDraft {
+  browser: boolean;
+  terminal: boolean;
+  python: boolean;
+  memoryAccess: "global" | "private";
+}
+
 export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingAgentId, setPendingAgentId] = useState("");
+  const [editingAgentId, setEditingAgentId] = useState("");
+  const [permissionDraft, setPermissionDraft] = useState<PermissionDraft | null>(null);
 
   useEffect(() => {
     const loadAgents = async () => {
@@ -77,6 +86,73 @@ export default function AgentsPage() {
     }
   };
 
+  const startEditingPermissions = (agent: Agent) => {
+    setEditingAgentId(agent.id);
+    setPermissionDraft({
+      browser: agent.skills.includes("browser"),
+      terminal: agent.skills.includes("terminal"),
+      python: agent.skills.includes("python"),
+      memoryAccess: agent.memory_access
+    });
+  };
+
+  const savePermissions = async (agent: Agent) => {
+    if (!permissionDraft) {
+      return;
+    }
+
+    const nextSkills = [
+      permissionDraft.browser ? "browser" : "",
+      permissionDraft.terminal ? "terminal" : "",
+      permissionDraft.python ? "python" : ""
+    ].filter((value) => value.length > 0);
+
+    if (nextSkills.length === 0) {
+      setError("Activa al menos una habilidad para guardar permisos.");
+      return;
+    }
+
+    setPendingAgentId(agent.id);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/agents/${encodeURIComponent(agent.id)}/permissions`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          skills: nextSkills,
+          memory_access: permissionDraft.memoryAccess
+        })
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        setError(payload?.error?.message ?? "No se pudieron guardar los permisos.");
+        return;
+      }
+
+      setAgents((prev) =>
+        prev.map((row) =>
+          row.id === agent.id
+            ? {
+                ...row,
+                skills: payload.agent.skills as string[],
+                memory_access: payload.agent.memory_access as "global" | "private"
+              }
+            : row
+        )
+      );
+      setEditingAgentId("");
+      setPermissionDraft(null);
+    } catch {
+      setError("No se pudieron guardar los permisos.");
+    } finally {
+      setPendingAgentId("");
+    }
+  };
+
   return (
     <section className="grid">
       <article className="card">
@@ -117,6 +193,86 @@ export default function AgentsPage() {
                 >
                   {pendingAgentId === agent.id ? "Actualizando..." : label}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => startEditingPermissions(agent)}
+                  disabled={pendingAgentId === agent.id}
+                  style={{ marginLeft: "8px" }}
+                >
+                  {`Editar permisos ${agent.name}`}
+                </button>
+
+                {editingAgentId === agent.id && permissionDraft ? (
+                  <section style={{ marginTop: "10px", display: "grid", gap: "6px" }}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        aria-label={`Permisos ${agent.name} Browser`}
+                        checked={permissionDraft.browser}
+                        onChange={(event) =>
+                          setPermissionDraft((prev) => (prev ? { ...prev, browser: event.target.checked } : prev))
+                        }
+                      />{" "}
+                      Browser
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        aria-label={`Permisos ${agent.name} Terminal`}
+                        checked={permissionDraft.terminal}
+                        onChange={(event) =>
+                          setPermissionDraft((prev) => (prev ? { ...prev, terminal: event.target.checked } : prev))
+                        }
+                      />{" "}
+                      Terminal
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        aria-label={`Permisos ${agent.name} Python`}
+                        checked={permissionDraft.python}
+                        onChange={(event) =>
+                          setPermissionDraft((prev) => (prev ? { ...prev, python: event.target.checked } : prev))
+                        }
+                      />{" "}
+                      Python
+                    </label>
+                    <label htmlFor={`memory-${agent.id}`}>{`Memoria ${agent.name}`}</label>
+                    <select
+                      id={`memory-${agent.id}`}
+                      aria-label={`Memoria ${agent.name}`}
+                      value={permissionDraft.memoryAccess}
+                      onChange={(event) =>
+                        setPermissionDraft((prev) =>
+                          prev ? { ...prev, memoryAccess: event.target.value as "global" | "private" } : prev
+                        )
+                      }
+                      style={{ padding: "8px", borderRadius: "8px", border: "1px solid #d1d5db" }}
+                    >
+                      <option value="private">private</option>
+                      <option value="global">global</option>
+                    </select>
+                    <div style={{ display: "flex", gap: "8px", marginTop: "2px" }}>
+                      <button
+                        type="button"
+                        onClick={() => savePermissions(agent)}
+                        disabled={pendingAgentId === agent.id}
+                      >
+                        {`Guardar permisos ${agent.name}`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingAgentId("");
+                          setPermissionDraft(null);
+                        }}
+                        disabled={pendingAgentId === agent.id}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
               </article>
             );
           })}

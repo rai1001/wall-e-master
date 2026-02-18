@@ -135,3 +135,13 @@ Risks: Agent registry is currently in-memory for runtime state, so restart clear
 Validation done: pnpm --filter @clawos/middleware test agents.management.test.ts; pnpm --filter @clawos/web test:e2e tests/agents-management.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added middleware agent list/status APIs, web `/agents` management view, proxy routes, and end-to-end sleep/wake coverage.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add post-creation permission editing for agents (skills and memory scope).
+Phase: Phase 3
+Rules checked: 1, 2, 4, 6, 8
+Risks: Permission edits remain in runtime registry only until persistent storage for registry is implemented.
+Validation done: pnpm --filter @clawos/middleware test agents.permissions.test.ts; pnpm --filter @clawos/web test:e2e tests/agents-permissions.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/api/agents/:id/permissions` in middleware, web proxy route, permission editor controls in `/agents`, and end-to-end coverage for saving permissions.
+```
