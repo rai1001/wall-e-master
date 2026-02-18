@@ -9,13 +9,13 @@ import { KnowledgeStore } from "../services/knowledge-store";
 import { MemoryStore } from "../services/memory-store";
 
 describe("durable stores", () => {
-  it("persists memory chunks across store restarts", () => {
+  it("persists memory chunks across store restarts", async () => {
     const workingDir = mkdtempSync(join(tmpdir(), "clawos-memory-store-"));
     const storagePath = join(workingDir, "memory-store.json");
 
     try {
       const memoryA = new MemoryStore(storagePath);
-      const memoryId = memoryA.add({
+      const memoryId = await memoryA.add({
         content: "Stripe endpoint is now /v2",
         metadata: {
           agent_id: "lince",
@@ -25,10 +25,10 @@ describe("durable stores", () => {
         },
         priority_score: 9
       });
-      memoryA.pin(memoryId);
+      await memoryA.pin(memoryId);
 
       const memoryB = new MemoryStore(storagePath);
-      const results = memoryB.search("stripe");
+      const results = await memoryB.search("stripe");
       const row = results.find((item) => item.id === memoryId);
 
       expect(row).toBeDefined();

@@ -16,8 +16,10 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 5. Agent registry persistence path configured (optional):
    - `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
-6. Shared memory persistence path configured (optional but recommended):
-   - `CLAWOS_MEMORY_PATH` or `CLAWOS_MEMORY_DIR`
+6. Shared memory backend configured (optional but recommended):
+   - `CLAWOS_MEMORY_BACKEND=json|lancedb` (default `json`)
+   - if `json`: `CLAWOS_MEMORY_PATH` or `CLAWOS_MEMORY_DIR`
+   - if `lancedb`: `CLAWOS_MEMORY_LANCEDB_DIR` (or `CLAWOS_MEMORY_DIR/lancedb`)
 7. Knowledge feed/graph persistence path configured (optional but recommended):
    - `CLAWOS_KNOWLEDGE_PATH` or `CLAWOS_KNOWLEDGE_DIR`
 8. Cost summary persistence path configured (optional but recommended):
@@ -107,7 +109,10 @@ Actions:
 1. verify ingest path is writing records
 2. verify query includes expected project scope
 3. inspect metadata tags and source values
-4. verify `CLAWOS_MEMORY_PATH`/`CLAWOS_MEMORY_DIR` points to persistent writable storage
+4. verify backend config:
+   - `CLAWOS_MEMORY_BACKEND=json|lancedb`
+   - json mode: `CLAWOS_MEMORY_PATH`/`CLAWOS_MEMORY_DIR` writable
+   - lancedb mode: `CLAWOS_MEMORY_LANCEDB_DIR` writable
 
 ### 3.1. Knowledge feed/graph is empty after restart
 

@@ -112,6 +112,11 @@ Last update: 2026-02-18
    - removed recurrent build/runtime warnings during local dev and CI-like checks
    - OpenAPI contract now includes `operationId`, `license`, and required 4xx responses
    - Redocly lint now passes with zero warnings
+28. LanceDB memory adapter baseline:
+   - `MemoryStore` now supports `CLAWOS_MEMORY_BACKEND=json|lancedb`
+   - LanceDB local table persistence with `add/search/pin` parity
+   - async memory flow wired through event bus and memory routes
+   - regression coverage added for LanceDB directory-backed restart behavior
 
 ## In Progress
 
@@ -119,5 +124,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Optional: introduce LanceDB adapter as storage backend while preserving current API contracts
-2. Optional: wire token-accurate cost accounting from model/provider usage telemetry
+1. Optional: wire token-accurate cost accounting from model/provider usage telemetry
+2. Optional: replace deterministic local embeddings in LanceDB mode with provider-backed embeddings (OpenAI/Ollama)

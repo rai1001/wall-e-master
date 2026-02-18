@@ -7,6 +7,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@lancedb/lancedb": "^0.26.2",
     "express": "^4.21.1",
     "ws": "^8.19.0"
   },

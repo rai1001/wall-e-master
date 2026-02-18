@@ -9,8 +9,8 @@ interface QueueResult {
 class MemoryEventBus {
   constructor(private readonly store: MemoryStore) {}
 
-  ingest(input: MemoryIngestInput): QueueResult {
-    const memoryId = this.store.add(input);
+  async ingest(input: MemoryIngestInput): Promise<QueueResult> {
+    const memoryId = await this.store.add(input);
     return {
       status: "queued",
       memory_id: memoryId

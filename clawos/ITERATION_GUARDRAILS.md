@@ -255,3 +255,13 @@ Risks: `allowedDevOrigins` currently enumerates localhost/127.0.0.1 ports and ma
 Validation done: pnpm --filter @clawos/web build; pnpm --filter @clawos/web test:e2e tests/smoke.spec.ts; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
 Outcome: Eliminated recurring Next.js warning noise via explicit config and brought OpenAPI lint quality to zero warnings by adding operationIds, license metadata, and missing 4xx responses.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Implement LanceDB memory backend adapter without breaking existing memory contracts.
+Phase: Phase 1
+Rules checked: 2, 3, 6, 7, 8
+Risks: Current LanceDB semantic vector uses deterministic local embedding; production relevance quality depends on future provider-backed embeddings.
+Validation done: pnpm --filter @clawos/middleware test memory.lancedb.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added `CLAWOS_MEMORY_BACKEND=json|lancedb`, implemented LanceDB add/search/pin parity, updated memory bus/routes to async flow, and added restart-persistence regression coverage.
+```

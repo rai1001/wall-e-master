@@ -8,23 +8,23 @@ const memoryRouter = Router();
 const memoryStore = new MemoryStore();
 const memoryEventBus = new MemoryEventBus(memoryStore);
 
-memoryRouter.get("/search", (req, res) => {
+memoryRouter.get("/search", async (req, res) => {
   const query = String(req.query.q ?? "");
   const projectId = String(req.query.project_id ?? "");
   const limitValue = Number(req.query.limit ?? 10);
   const limit = Number.isFinite(limitValue) && limitValue > 0 ? Math.floor(limitValue) : 10;
-  const allResults = memoryStore.search(query);
+  const allResults = await memoryStore.search(query);
   const scopedResults = projectId ? allResults.filter((row) => row.metadata.project_id === projectId) : allResults;
   const results = scopedResults.slice(0, Math.min(limit, 50));
 
-  res.status(200).json({
+  return res.status(200).json({
     query,
     project_id: projectId || undefined,
     results
   });
 });
 
-memoryRouter.post("/ingest", (req, res) => {
+memoryRouter.post("/ingest", async (req, res) => {
   const payload = req.body ?? {};
   const content = typeof payload.content === "string" ? payload.content : "";
   const metadata = payload.metadata ?? {};
@@ -42,7 +42,7 @@ memoryRouter.post("/ingest", (req, res) => {
     );
   }
 
-  const result = memoryEventBus.ingest({
+  const result = await memoryEventBus.ingest({
     content,
     metadata: {
       agent_id: metadata.agent_id,
@@ -57,7 +57,7 @@ memoryRouter.post("/ingest", (req, res) => {
   return res.status(202).json(result);
 });
 
-memoryRouter.post("/pin", (req, res) => {
+memoryRouter.post("/pin", async (req, res) => {
   const memoryId = typeof req.body?.memory_id === "string" ? req.body.memory_id.trim() : "";
   if (!memoryId) {
     return res.status(400).json(
@@ -67,7 +67,7 @@ memoryRouter.post("/pin", (req, res) => {
     );
   }
 
-  const pinned = memoryStore.pin(memoryId);
+  const pinned = await memoryStore.pin(memoryId);
   if (!pinned) {
     return res.status(404).json(
       buildErrorResponse("not_found", "Memory chunk not found", {
