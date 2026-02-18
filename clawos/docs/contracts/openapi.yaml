@@ -113,20 +113,9 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              required:
-                - audio
-                - agent_id
-              properties:
-                audio:
-                  type: string
-                  format: binary
-                agent_id:
-                  type: string
-                project_id:
-                  type: string
+              $ref: "#/components/schemas/VoiceProcessRequest"
       responses:
         "200":
           description: Voice pipeline output
@@ -134,8 +123,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/VoiceProcessResponse"
-        "422":
-          description: Invalid audio payload
+        "400":
+          description: Invalid or missing voice payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: Audio payload too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
           content:
             application/json:
               schema:
@@ -373,6 +374,20 @@ components:
         status:
           type: string
         handoff_id:
+          type: string
+
+    VoiceProcessRequest:
+      type: object
+      required:
+        - audio_base64
+        - agent_id
+      properties:
+        audio_base64:
+          type: string
+          description: Base64 encoded audio clip
+        agent_id:
+          type: string
+        project_id:
           type: string
 
     VoiceProcessResponse:

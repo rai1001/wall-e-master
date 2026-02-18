@@ -179,10 +179,15 @@ Response `200`:
 
 Receive audio, transcribe it, and route command to active agent.
 
-Request (multipart):
-- `audio`: binary
-- `agent_id`: string
-- `project_id`: string
+Request (`application/json`):
+
+```json
+{
+  "agent_id": "lince",
+  "project_id": "proj_001",
+  "audio_base64": "UklGRiQAAABXQVZF..."
+}
+```
 
 Response `200`:
 
@@ -191,6 +196,35 @@ Response `200`:
   "transcript": "resume project status for today",
   "agent_response": "Current status summary generated",
   "tts_audio_url": "/api/voice/output/response_123.mp3"
+}
+```
+
+Response `413` (oversized clip):
+
+```json
+{
+  "error": {
+    "code": "payload_too_large",
+    "message": "Audio payload exceeds maximum size",
+    "details": {
+      "limit_bytes": 512000,
+      "recovery_action": "Send a shorter audio clip or reduce audio quality."
+    }
+  }
+}
+```
+
+Response `429` (rate limited):
+
+```json
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Too many requests. Please wait and retry.",
+    "details": {
+      "recovery_action": "Wait a few seconds and retry the same action."
+    }
+  }
 }
 ```
 

@@ -1,6 +1,8 @@
 import express from "express";
 
 import { authMiddleware } from "./middleware/auth";
+import { createRateLimitMiddleware } from "./middleware/rate-limit";
+import { requestContextMiddleware, requestLoggerMiddleware } from "./middleware/request-context";
 import { agentsRouter } from "./routes/agents";
 import { healthRouter } from "./routes/health";
 import { handoffRouter } from "./routes/handoff";
@@ -11,9 +13,12 @@ import { voiceRouter } from "./routes/voice";
 
 const app = express();
 
-app.use(express.json());
+app.use(requestContextMiddleware);
+app.use(express.json({ limit: "2mb" }));
+app.use(requestLoggerMiddleware);
 app.use(healthRouter);
 app.use("/api", authMiddleware);
+app.use("/api", createRateLimitMiddleware());
 app.use("/api/agents", agentsRouter);
 app.use("/api/agents", handoffRouter);
 app.use("/api/memory", memoryRouter);
