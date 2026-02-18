@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { CanvasOpsPanel } from "../../components/canvas-ops-panel";
 import { DailyChefOperations } from "../../components/daily-chef-operations";
 
 interface ProjectStatusResponse {
@@ -369,6 +370,7 @@ export default function ProjectsPage() {
         )}
       </article>
       <DailyChefOperations />
+      <CanvasOpsPanel />
     </section>
   );
 }
