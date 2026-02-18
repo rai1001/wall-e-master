@@ -275,3 +275,13 @@ Risks: Google provider depends on external API/network availability and valid `G
 Validation done: pnpm --filter @clawos/middleware test memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added embedding provider registry (`local|google`), integrated Google embedding calls into memory add/search pipeline, and added actionable dependency errors on memory routes.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add token-accurate cost telemetry ingestion by project and agent.
+Phase: Phase 4
+Rules checked: 2, 6, 7, 8
+Risks: Accuracy depends on external producers sending trustworthy `tokens_in`, `tokens_out`, and `cost_usd` values.
+Validation done: pnpm --filter @clawos/middleware test costs.summary.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added `POST /api/costs/usage`, accumulated per-agent token/cost counters in durable store, and documented contracts/runbook updates for telemetry-driven cost control.
+```

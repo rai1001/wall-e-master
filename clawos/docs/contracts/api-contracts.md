@@ -448,6 +448,51 @@ Request:
 }
 ```
 
+### `POST /api/costs/usage`
+
+Record real usage telemetry from model/provider execution and accumulate totals by agent.
+
+Request:
+
+```json
+{
+  "project_id": "proj_001",
+  "agent_id": "lince",
+  "agent_name": "Lince",
+  "tokens_in": 1200,
+  "tokens_out": 800,
+  "cost_usd": 0.42,
+  "timestamp": "2026-02-18T11:30:00Z"
+}
+```
+
+Response `202`:
+
+```json
+{
+  "status": "recorded",
+  "summary": {
+    "project_id": "proj_001",
+    "spent_usd": 12.82,
+    "budget_usd": 20,
+    "remaining_usd": 7.18,
+    "status": "within_budget",
+    "control_actions": ["Mantener monitoreo semanal de costo por agente."],
+    "agents": [
+      {
+        "agent_id": "lince",
+        "name": "Lince",
+        "tokens_in": 12400,
+        "tokens_out": 7200,
+        "estimated_usd": 8.77,
+        "last_activity": "2026-02-18T11:30:00Z"
+      }
+    ],
+    "updated_at": "2026-02-18T11:30:01Z"
+  }
+}
+```
+
 Response `200`:
 
 ```json

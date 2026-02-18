@@ -62,4 +62,61 @@ costsRouter.patch("/summary", (req, res) => {
   return res.status(200).json(summary);
 });
 
+costsRouter.post("/usage", (req, res) => {
+  const projectId = typeof req.body?.project_id === "string" ? req.body.project_id.trim() : "";
+  const agentId = typeof req.body?.agent_id === "string" ? req.body.agent_id.trim() : "";
+  const agentName = typeof req.body?.agent_name === "string" ? req.body.agent_name.trim() : "";
+  const tokensIn = req.body?.tokens_in;
+  const tokensOut = req.body?.tokens_out;
+  const costUsd = req.body?.cost_usd;
+  const timestamp = typeof req.body?.timestamp === "string" ? req.body.timestamp.trim() : undefined;
+
+  if (
+    !projectId ||
+    !agentId ||
+    typeof tokensIn !== "number" ||
+    !Number.isFinite(tokensIn) ||
+    tokensIn < 0 ||
+    typeof tokensOut !== "number" ||
+    !Number.isFinite(tokensOut) ||
+    tokensOut < 0 ||
+    typeof costUsd !== "number" ||
+    !Number.isFinite(costUsd) ||
+    costUsd < 0
+  ) {
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "Invalid usage telemetry payload", {
+        recovery_action: "Send project_id, agent_id, tokens_in, tokens_out, and cost_usd with non-negative numeric values."
+      })
+    );
+  }
+
+  const summary = costStore.recordUsage(projectId, {
+    agent_id: agentId,
+    agent_name: agentName || undefined,
+    tokens_in: tokensIn,
+    tokens_out: tokensOut,
+    cost_usd: costUsd,
+    timestamp
+  });
+
+  if (summary.status === "over_budget") {
+    emitSecurityEvent({
+      requestId: String(res.locals.request_id ?? "unknown"),
+      event: "project_budget_overrun",
+      outcome: "warning",
+      details: {
+        project_id: projectId,
+        spent_usd: summary.spent_usd,
+        budget_usd: summary.budget_usd
+      }
+    });
+  }
+
+  return res.status(202).json({
+    status: "recorded",
+    summary
+  });
+});
+
 export { costsRouter };

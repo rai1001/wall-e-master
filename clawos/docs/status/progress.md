@@ -122,6 +122,11 @@ Last update: 2026-02-18
    - Google Gemini embedding integration with actionable config/runtime error handling
    - memory routes now return taxonomy-aware dependency errors (`503/502`) for embedding provider failures
    - regression tests added for missing `GOOGLE_API_KEY` and successful Google embedding request path
+30. Token-accurate cost telemetry ingestion:
+   - new middleware endpoint `POST /api/costs/usage`
+   - per-agent counters now accumulate real `tokens_in`, `tokens_out`, and `cost_usd` telemetry
+   - cost summary remains budget-aware and emits over-budget security events when thresholds are crossed
+   - regression tests added for usage ingestion and validation error handling
 
 ## In Progress
 
@@ -129,5 +134,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Optional: wire token-accurate cost accounting from model/provider usage telemetry
+1. Optional: wire OpenClaw websocket bridge events to auto-publish usage telemetry into `/api/costs/usage` (remove manual posting)
 2. Optional: add OpenAI/Ollama embedding adapters behind current provider registry

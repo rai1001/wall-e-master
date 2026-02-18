@@ -29,6 +29,15 @@ interface ProjectCostState {
   agents: AgentCostSummary[];
 }
 
+interface UsageTelemetryInput {
+  agent_id: string;
+  agent_name?: string;
+  tokens_in: number;
+  tokens_out: number;
+  cost_usd: number;
+  timestamp?: string;
+}
+
 function roundCurrency(value: number): number {
   return Math.round(value * 100) / 100;
 }
@@ -111,6 +120,35 @@ class CostStore {
     const normalizedProjectId = projectId.trim();
     const state = this.getOrCreateState(normalizedProjectId);
     state.budget_usd = roundCurrency(budgetUsd);
+    this.persistStates();
+    return this.toSummary(state);
+  }
+
+  recordUsage(projectId: string, usage: UsageTelemetryInput): ProjectCostSummary {
+    const normalizedProjectId = projectId.trim();
+    const state = this.getOrCreateState(normalizedProjectId);
+    const normalizedAgentId = usage.agent_id.trim();
+    const nextName = usage.agent_name?.trim() || normalizedAgentId;
+
+    let agent = state.agents.find((row) => row.agent_id === normalizedAgentId);
+    if (!agent) {
+      agent = {
+        agent_id: normalizedAgentId,
+        name: nextName,
+        tokens_in: 0,
+        tokens_out: 0,
+        estimated_usd: 0,
+        last_activity: new Date().toISOString()
+      };
+      state.agents.push(agent);
+    }
+
+    agent.name = nextName || agent.name;
+    agent.tokens_in += usage.tokens_in;
+    agent.tokens_out += usage.tokens_out;
+    agent.estimated_usd = roundCurrency(agent.estimated_usd + usage.cost_usd);
+    agent.last_activity = usage.timestamp?.trim() || new Date().toISOString();
+
     this.persistStates();
     return this.toSummary(state);
   }
@@ -245,4 +283,4 @@ class CostStore {
 }
 
 export { CostStore };
-export type { AgentCostSummary, ProjectCostSummary, CostStatus };
+export type { AgentCostSummary, ProjectCostSummary, CostStatus, UsageTelemetryInput };
