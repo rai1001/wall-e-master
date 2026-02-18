@@ -1,0 +1,13 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Temporary cloned references
+awesome/
+superpowers/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
