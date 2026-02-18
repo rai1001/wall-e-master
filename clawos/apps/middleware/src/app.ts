@@ -9,6 +9,7 @@ import { handoffRouter } from "./routes/handoff";
 import { knowledgeRouter } from "./routes/knowledge";
 import { memoryRouter } from "./routes/memory";
 import { projectsRouter } from "./routes/projects";
+import { securityRouter } from "./routes/security";
 import { voiceRouter } from "./routes/voice";
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/api/agents", handoffRouter);
 app.use("/api/memory", memoryRouter);
 app.use("/api/knowledge", knowledgeRouter);
 app.use("/api/projects", projectsRouter);
+app.use("/api/security", securityRouter);
 app.use("/api/voice", voiceRouter);
 
 export { app };

@@ -340,6 +340,41 @@ Response `200`:
 }
 ```
 
+### `GET /api/security/checklist`
+
+Return automated remote-access readiness checks and guided tunnel commands.
+
+Response `200`:
+
+```json
+{
+  "generated_at": "2026-02-18T12:00:00Z",
+  "overall_status": "review_required",
+  "remote_access": {
+    "provider": "tailscale",
+    "public_url": "https://clawos.usuario.ts.net"
+  },
+  "checks": [
+    {
+      "id": "auth_token_not_default",
+      "status": "warn",
+      "message": "Se esta usando token por defecto (dev-token).",
+      "recovery_action": "Define API_BEARER_TOKEN con un valor fuerte."
+    },
+    {
+      "id": "openclaw_local_only",
+      "status": "pass",
+      "message": "OpenClaw sigue en red local privada.",
+      "recovery_action": "Mantener OPENCLAW_WS_URL en localhost o 127.0.0.1."
+    }
+  ],
+  "helper_commands": {
+    "tailscale": ["tailscale up", "tailscale funnel 3000"],
+    "cloudflare": ["cloudflared tunnel --url http://127.0.0.1:3000"]
+  }
+}
+```
+
 ### `GET /api/knowledge/feed?project_id=<id>`
 
 Return global discovery feed entries (agent findings timeline).

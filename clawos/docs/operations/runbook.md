@@ -16,6 +16,10 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 5. Agent registry persistence path configured (optional):
    - `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
+6. Remote access posture inputs configured (recommended):
+   - `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
+   - `REMOTE_ACCESS_PROVIDER=none|tailscale|cloudflare`
+   - `TAILSCALE_FUNNEL_URL` or `CLOUDFLARE_TUNNEL_URL` when provider is enabled
 
 ## Startup
 
@@ -42,6 +46,8 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
    - `GET /health/ready` should return `200`
 3. Protected endpoint check:
    - `GET /api/projects/status?project_id=proj_001` without token should return `401`
+4. Security checklist check:
+   - `GET /api/security/checklist` with token should return `200` and actionable `checks[]`
 
 ## Authentication Check
 
@@ -90,6 +96,14 @@ Actions:
 1. verify `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH` points to writable storage
 2. check if `agents-registry.json` exists in configured path
 3. restart middleware and confirm `GET /api/agents` returns expected rows
+
+### 5. Remote access checklist reports warnings
+
+Actions:
+1. call `GET /api/security/checklist` with bearer token
+2. review each `checks[].recovery_action`
+3. apply tunnel/provider vars and restart middleware
+4. verify `overall_status` changes from `review_required` to `ready_for_remote_access`
 
 ## Deployment Safety
 

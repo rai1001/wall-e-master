@@ -165,3 +165,13 @@ Risks: Broad unscoped global queries can return mixed-project context unless use
 Validation done: pnpm --filter @clawos/web test:e2e tests/global-memory-search.spec.ts; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/middleware test
 Outcome: Header-level global search launcher + keyboard shortcut now queries shared memory without forced project filter and presents results in plain-language modal UX.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add automated remote-security checklist and guided tunnel helpers.
+Phase: Phase 4
+Rules checked: 1, 2, 5, 7, 8
+Risks: Checklist validates environment posture only; it does not verify external identity policies in Tailscale/Cloudflare dashboards.
+Validation done: pnpm --filter @clawos/middleware test security.checklist.test.ts; pnpm --filter @clawos/web test:e2e tests/security-checklist.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/api/security/checklist` backend checks, `/security` non-technical web view, and helper command guidance for secure remote access setup.
+```

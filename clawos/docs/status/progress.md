@@ -50,6 +50,12 @@ Last update: 2026-02-18
    - keyboard shortcut opens global search dialog (`Ctrl+K` / `Cmd+K`)
    - query runs against `/api/memory/search` without forced `project_id`
    - E2E coverage validates shortcut flow and shared-memory results rendering
+16. Remote security checklist automation and deployment helpers:
+   - new middleware endpoint `GET /api/security/checklist`
+   - automated checks for token strength, daemon locality, tunnel/provider setup, voice keys, and API rate limiting
+   - helper command blocks for Tailscale Funnel and Cloudflare Tunnel
+   - new `/security` UI view and proxy route for non-technical guided setup
+   - middleware and E2E tests covering checklist API and security page rendering
 
 ## In Progress
 
@@ -57,6 +63,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Add Tailscale/Cloudflare deployment helpers and security checklist automation
-2. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
-3. Add cost/control widgets per agent and project
+1. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
+2. Add cost/control widgets per agent and project

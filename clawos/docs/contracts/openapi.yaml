@@ -247,6 +247,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectStatusResponse"
+  /security/checklist:
+    get:
+      summary: Automated remote-access security checklist
+      responses:
+        "200":
+          description: Security checklist and helper commands
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityChecklistResponse"
   /knowledge/feed:
     get:
       summary: Global discovery feed entries
@@ -560,6 +570,58 @@ components:
         updated_at:
           type: string
           format: date-time
+
+    SecurityChecklistResponse:
+      type: object
+      properties:
+        generated_at:
+          type: string
+          format: date-time
+        overall_status:
+          type: string
+        remote_access:
+          $ref: "#/components/schemas/RemoteAccessSummary"
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/SecurityCheck"
+        helper_commands:
+          $ref: "#/components/schemas/SecurityHelperCommands"
+
+    RemoteAccessSummary:
+      type: object
+      properties:
+        provider:
+          type: string
+          enum: [none, tailscale, cloudflare]
+        public_url:
+          type: string
+          nullable: true
+
+    SecurityCheck:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [pass, warn]
+        message:
+          type: string
+        recovery_action:
+          type: string
+
+    SecurityHelperCommands:
+      type: object
+      properties:
+        tailscale:
+          type: array
+          items:
+            type: string
+        cloudflare:
+          type: array
+          items:
+            type: string
 
     KnowledgeFeedResponse:
       type: object

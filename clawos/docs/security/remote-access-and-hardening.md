@@ -84,6 +84,20 @@ Use Cloudflare Tunnel as optional fallback ingress.
 - [ ] Log redaction enabled
 - [ ] Health and security monitoring active
 
+## Automated Checklist Endpoint
+
+Middleware exposes:
+
+- `GET /api/security/checklist`
+
+Response includes:
+
+- `overall_status` (`ready_for_remote_access` or `review_required`)
+- `checks[]` with `pass|warn` + `recovery_action`
+- `helper_commands.tailscale[]` and `helper_commands.cloudflare[]`
+
+Use this endpoint as the first step before enabling remote access from outside home.
+
 ## Operations Reference
 
 Use `clawos/docs/operations/runbook.md` for startup, health checks, and incident actions.
