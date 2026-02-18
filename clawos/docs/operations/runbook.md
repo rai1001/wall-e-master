@@ -1,0 +1,91 @@
+# ClawOS Operations Runbook
+
+## Purpose
+
+Operate ClawOS safely on a local machine where OpenClaw is already installed and running.
+
+## Preconditions
+
+1. OpenClaw daemon active on `ws://127.0.0.1:18789`
+2. Middleware and web app dependencies installed
+3. `API_BEARER_TOKEN` configured for protected API access
+
+## Startup
+
+From `clawos/`:
+
+```bash
+pnpm install
+pnpm --filter @clawos/middleware test
+pnpm --filter @clawos/web dev
+```
+
+In a separate terminal:
+
+```bash
+cd clawos
+pnpm --filter @clawos/middleware exec tsx src/server.ts
+```
+
+## Health Checks
+
+1. Liveness:
+   - `GET /health/live` should return `200`
+2. Readiness:
+   - `GET /health/ready` should return `200`
+3. Protected endpoint check:
+   - `GET /api/projects/status?project_id=proj_001` without token should return `401`
+
+## Authentication Check
+
+Use header:
+
+```text
+Authorization: Bearer <API_BEARER_TOKEN>
+```
+
+Default local dev token if env not set: `dev-token`.
+
+## Common Incidents
+
+### 1. OpenClaw not reachable
+
+Symptoms:
+- bridge reconnect loops
+- no streaming events
+
+Actions:
+1. verify daemon is running on `127.0.0.1:18789`
+2. check local firewall rules
+3. restart middleware after daemon is back
+
+### 2. Voice endpoint returns errors
+
+Actions:
+1. verify STT/TTS provider keys
+2. check payload size and format
+3. confirm provider network access
+
+### 3. Memory search returns empty results
+
+Actions:
+1. verify ingest path is writing records
+2. verify query includes expected project scope
+3. inspect metadata tags and source values
+
+## Deployment Safety
+
+1. Never expose OpenClaw daemon port directly
+2. Expose middleware only via Tailscale or Cloudflare Tunnel
+3. Keep auth enabled on all `/api/*` endpoints
+
+## Verification Before Completion
+
+Run:
+
+```bash
+pnpm --filter @clawos/middleware test
+pnpm --filter @clawos/web test:e2e
+pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
+```
+

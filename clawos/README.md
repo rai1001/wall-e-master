@@ -50,3 +50,4 @@ clawos/
 6. Execute `clawos/docs/plans/2026-02-18-clawos-implementation.md`
 7. Track milestones in `clawos/docs/plans/2026-02-18-roadmap-v2.md`
 8. Track priorities in `clawos/docs/improvements/backlog.md`
+9. Operate with `clawos/docs/operations/runbook.md`

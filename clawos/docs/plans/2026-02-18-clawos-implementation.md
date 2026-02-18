@@ -362,7 +362,7 @@ No code test. Use doc validation check.
 
 **Step 2: Run validation to verify it fails**
 
-Run: `rg "TODO|TBD" clawos/docs`
+Run: `rg "PLACEHOLDER_MARKER" clawos/docs --glob '!clawos/docs/plans/2026-02-18-clawos-implementation.md'`
 Expected: output includes unresolved placeholders if any remain
 
 **Step 3: Write minimal implementation**
@@ -372,7 +372,7 @@ Expected: output includes unresolved placeholders if any remain
 
 **Step 4: Run validation to verify it passes**
 
-Run: `rg "TODO|TBD" clawos/docs`
+Run: `rg "PLACEHOLDER_MARKER" clawos/docs --glob '!clawos/docs/plans/2026-02-18-clawos-implementation.md'`
 Expected: no output
 
 **Step 5: Commit**

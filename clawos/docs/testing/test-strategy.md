@@ -75,13 +75,11 @@ Focus:
 
 ```bash
 # middleware tests
-npm run test:unit --workspace apps/middleware
-npm run test:integration --workspace apps/middleware
+pnpm --filter @clawos/middleware test
 
 # frontend e2e
-npm run test:e2e --workspace apps/web
+pnpm --filter @clawos/web test:e2e
 
 # contract lint
-npx @redocly/cli lint clawos/docs/contracts/openapi.yaml
+pnpm --package=@redocly/cli dlx redocly lint clawos/docs/contracts/openapi.yaml
 ```
-

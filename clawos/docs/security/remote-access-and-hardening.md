@@ -83,3 +83,7 @@ Use Cloudflare Tunnel as optional fallback ingress.
 - [ ] Rate limiting active
 - [ ] Log redaction enabled
 - [ ] Health and security monitoring active
+
+## Operations Reference
+
+Use `clawos/docs/operations/runbook.md` for startup, health checks, and incident actions.
