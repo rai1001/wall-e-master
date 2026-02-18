@@ -246,6 +246,21 @@ Response `200`:
 }
 ```
 
+Response `404`:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Memory chunk not found",
+    "details": {
+      "taxonomy": "resource",
+      "recovery_action": "Search memory first and use a valid memory_id."
+    }
+  }
+}
+```
+
 ### `POST /api/agents/handoff`
 
 Transfer context from one agent to another.

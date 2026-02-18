@@ -16,7 +16,9 @@ export function ChatShell() {
   const [status, setStatus] = useState("Esperando comando.");
   const [results, setResults] = useState<MemorySearchResult[]>([]);
   const [error, setError] = useState("");
+  const [pinMessage, setPinMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pinningId, setPinningId] = useState("");
 
   const onSearch = async () => {
     const normalized = query.trim();
@@ -26,6 +28,7 @@ export function ChatShell() {
 
     setLoading(true);
     setError("");
+    setPinMessage("");
     setStatus("Buscando contexto en memoria compartida...");
 
     try {
@@ -50,6 +53,36 @@ export function ChatShell() {
       setResults([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onPin = async (memoryId: string) => {
+    setPinningId(memoryId);
+    setPinMessage("");
+
+    try {
+      const response = await fetch("/api/memory/pin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          memory_id: memoryId,
+          reason: "Pinned from chat control panel"
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setPinMessage(payload?.error?.message ?? "No pudimos fijar el recuerdo seleccionado.");
+        return;
+      }
+
+      setPinMessage("Memoria fijada en contexto global.");
+    } catch {
+      setPinMessage("No pudimos fijar la memoria por falta de conexion.");
+    } finally {
+      setPinningId("");
     }
   };
 
@@ -90,11 +123,25 @@ export function ChatShell() {
           {error}
         </p>
       ) : null}
+      {pinMessage ? (
+        <p className="muted" style={{ marginTop: "8px" }}>
+          {pinMessage}
+        </p>
+      ) : null}
       {results.length > 0 ? (
         <ul style={{ marginTop: "10px" }}>
           {results.map((item) => (
             <li key={item.id}>
-              {item.content} ({item.metadata.agent_id} / {item.metadata.source})
+              {item.content} ({item.metadata.agent_id} / {item.metadata.source}){" "}
+              <button
+                type="button"
+                aria-label={`Fijar en memoria global ${item.id}`}
+                onClick={() => onPin(item.id)}
+                disabled={pinningId === item.id}
+                style={{ marginLeft: "8px" }}
+              >
+                {pinningId === item.id ? "Fijando..." : "Fijar en memoria global"}
+              </button>
             </li>
           ))}
         </ul>

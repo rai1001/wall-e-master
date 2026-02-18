@@ -205,3 +205,13 @@ Risks: Counters are currently in-memory and reset on middleware restart.
 Validation done: pnpm --filter @clawos/middleware test observability.summary.test.ts; pnpm --filter @clawos/web test:e2e tests/security-checklist.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/api/observability/summary` with rolling security/error counters and integrated `Panel de Observabilidad` in `/security`.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Implement memory pinning action for reinforcement from chat UI.
+Phase: Phase 3
+Rules checked: 2, 3, 6, 8
+Risks: Pinning is in-memory in current store; reinforcement persistence across process restart requires LanceDB integration.
+Validation done: pnpm --filter @clawos/middleware test memory.pin.test.ts; pnpm --filter @clawos/web test:e2e tests/memory-pin.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added middleware + web pin route and chat action to fix key findings into global memory context.
+```

@@ -74,6 +74,12 @@ Last update: 2026-02-18
    - alert status model (`nominal|watch|critical`) plus active `alerts[]`
    - `/security` now includes `Panel de Observabilidad` for non-technical operators
    - middleware and E2E tests for summary counters and UI rendering
+20. Memory pinning/reinforcement controls:
+   - middleware route `POST /api/memory/pin` now implemented
+   - memory store supports pinned chunks with boosted priority score
+   - web proxy route `POST /api/memory/pin`
+   - chat results now include `Fijar en memoria global` action
+   - middleware and E2E tests cover pin success and not-found behavior
 
 ## In Progress
 
@@ -82,5 +88,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Add memory pinning/reinforcement controls in UI
-2. Persist observability counters to durable storage
+1. Persist observability counters to durable storage
+2. Add memory cluster/map visualization for non-technical navigation

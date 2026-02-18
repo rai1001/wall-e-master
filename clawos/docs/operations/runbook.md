@@ -132,6 +132,13 @@ Actions:
 2. review `alerts[]` and top counters (`security_event_counters`, `error_taxonomy_counters`)
 3. prioritize auth/policy/rate-limit anomalies before feature work
 
+### 9. Memory pinning action fails in chat
+
+Actions:
+1. verify `POST /api/memory/pin` responds `200` for the selected `memory_id`
+2. if `404`, rerun memory search and use a valid chunk id
+3. confirm middleware process is running and reachable from web proxy
+
 ## Deployment Safety
 
 1. Never expose OpenClaw daemon port directly

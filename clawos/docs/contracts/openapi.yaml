@@ -182,6 +182,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MemoryPinResponse"
+        "400":
+          description: Invalid pin payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Memory chunk not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /agents/handoff:
     post:
       summary: Transfer context from one agent to another

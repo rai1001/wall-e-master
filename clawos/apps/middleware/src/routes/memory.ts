@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { MemoryEventBus } from "../services/memory-event-bus";
 import { MemoryStore } from "../services/memory-store";
+import { buildErrorResponse } from "../services/observability";
 
 const memoryRouter = Router();
 const memoryStore = new MemoryStore();
@@ -56,6 +57,32 @@ memoryRouter.post("/ingest", (req, res) => {
   });
 
   return res.status(202).json(result);
+});
+
+memoryRouter.post("/pin", (req, res) => {
+  const memoryId = typeof req.body?.memory_id === "string" ? req.body.memory_id.trim() : "";
+  if (!memoryId) {
+    return res.status(400).json(
+      buildErrorResponse("validation_error", "memory_id is required", {
+        recovery_action: "Send memory_id of an existing chunk."
+      })
+    );
+  }
+
+  const pinned = memoryStore.pin(memoryId);
+  if (!pinned) {
+    return res.status(404).json(
+      buildErrorResponse("not_found", "Memory chunk not found", {
+        recovery_action: "Search memory first and use a valid memory_id."
+      })
+    );
+  }
+
+  return res.status(200).json({
+    memory_id: pinned.id,
+    priority_score: pinned.priority_score,
+    pinned: true
+  });
 });
 
 export { memoryRouter };

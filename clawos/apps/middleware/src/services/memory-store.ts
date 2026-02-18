@@ -13,6 +13,7 @@ interface MemorySearchResult {
     timestamp: string;
     tags: string[];
   };
+  pinned?: boolean;
 }
 
 interface MemoryIngestInput {
@@ -97,6 +98,18 @@ class MemoryStore {
     }
 
     return results;
+  }
+
+  pin(memoryId: string): MemorySearchResult | null {
+    const row = this.rows.find((item) => item.id === memoryId);
+    if (!row) {
+      return null;
+    }
+
+    row.priority_score = Math.min(15, row.priority_score + 3);
+    row.score = Math.min(0.99, row.score + 0.05);
+    row.pinned = true;
+    return row;
   }
 }
 
