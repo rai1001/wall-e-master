@@ -11,6 +11,9 @@ clawos/apps/web/.next/
 clawos/apps/web/test-results/
 clawos/apps/web/playwright-report/
 
+# Runtime workspace artifacts
+clawos/apps/middleware/workspace/
+
 # OS/editor
 .DS_Store
 Thumbs.db
