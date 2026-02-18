@@ -3,6 +3,8 @@ import express from "express";
 import { authMiddleware } from "./middleware/auth";
 import { agentsRouter } from "./routes/agents";
 import { healthRouter } from "./routes/health";
+import { handoffRouter } from "./routes/handoff";
+import { knowledgeRouter } from "./routes/knowledge";
 import { memoryRouter } from "./routes/memory";
 import { projectsRouter } from "./routes/projects";
 import { voiceRouter } from "./routes/voice";
@@ -13,7 +15,9 @@ app.use(express.json());
 app.use(healthRouter);
 app.use("/api", authMiddleware);
 app.use("/api/agents", agentsRouter);
+app.use("/api/agents", handoffRouter);
 app.use("/api/memory", memoryRouter);
+app.use("/api/knowledge", knowledgeRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/voice", voiceRouter);
 
