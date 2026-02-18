@@ -15,7 +15,7 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - if `STT_PROVIDER=openai`: `OPENAI_API_KEY`
    - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 5. Agent registry persistence path configured (optional):
-   - `CLOWOS_AGENTS_DIR` or `CLOWOS_AGENT_REGISTRY_PATH`
+   - `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
 
 ## Startup
 
@@ -87,7 +87,7 @@ Actions:
 ### 4. Agents disappear after middleware restart
 
 Actions:
-1. verify `CLOWOS_AGENTS_DIR` or `CLOWOS_AGENT_REGISTRY_PATH` points to writable storage
+1. verify `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH` points to writable storage
 2. check if `agents-registry.json` exists in configured path
 3. restart middleware and confirm `GET /api/agents` returns expected rows
 

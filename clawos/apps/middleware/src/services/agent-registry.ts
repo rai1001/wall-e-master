@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync, type Dirent } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
 import type { Agent, AgentStatus, MemoryAccess } from "./agent-factory";
 
@@ -72,6 +72,12 @@ class AgentRegistry {
   private loadAgents(): Map<string, Agent> {
     const storagePath = this.resolveStoragePath();
     if (!existsSync(storagePath)) {
+      const bootstrapped = this.bootstrapFromLegacyConfigs();
+      if (bootstrapped.size > 0) {
+        this.saveAgents(bootstrapped);
+        return bootstrapped;
+      }
+
       return new Map();
     }
 
@@ -101,6 +107,72 @@ class AgentRegistry {
     const storagePath = this.resolveStoragePath();
     mkdirSync(dirname(storagePath), { recursive: true });
     writeFileSync(storagePath, JSON.stringify(Array.from(agents.values()), null, 2), "utf8");
+  }
+
+  private bootstrapFromLegacyConfigs(): Map<string, Agent> {
+    const baseDir = this.resolveLegacyBaseDir();
+    if (!existsSync(baseDir)) {
+      return new Map();
+    }
+
+    const configPaths = this.findLegacyConfigFiles(baseDir);
+    const agents = new Map<string, Agent>();
+
+    for (const configPath of configPaths) {
+      try {
+        const raw = readFileSync(configPath, "utf8");
+        const parsed = JSON.parse(raw) as unknown;
+        const agent = this.parseLegacyConfig(parsed, configPath);
+        if (agent) {
+          agents.set(agent.id, agent);
+        }
+      } catch {
+        // ignore invalid legacy files and continue bootstrapping others
+      }
+    }
+
+    return agents;
+  }
+
+  private resolveLegacyBaseDir(): string {
+    if (process.env.CLAWOS_AGENTS_DIR) {
+      return process.env.CLAWOS_AGENTS_DIR;
+    }
+
+    return dirname(this.resolveStoragePath());
+  }
+
+  private findLegacyConfigFiles(baseDir: string): string[] {
+    const stack: string[] = [baseDir];
+    const files: string[] = [];
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      if (!current) {
+        continue;
+      }
+
+      let entries: Dirent[];
+      try {
+        entries = readdirSync(current, { withFileTypes: true });
+      } catch {
+        continue;
+      }
+
+      for (const entry of entries) {
+        const fullPath = join(current, entry.name);
+        if (entry.isDirectory()) {
+          stack.push(fullPath);
+          continue;
+        }
+
+        if (entry.isFile() && entry.name.endsWith(".config.json")) {
+          files.push(fullPath);
+        }
+      }
+    }
+
+    return files;
   }
 
   private parseAgent(value: unknown): Agent | null {
@@ -133,6 +205,42 @@ class AgentRegistry {
       skills,
       memory_access: row.memory_access,
       status: row.status
+    };
+  }
+
+  private parseLegacyConfig(value: unknown, configPath: string): Agent | null {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+
+    const row = value as Record<string, unknown>;
+    const inferredSlug = basename(configPath, ".config.json");
+
+    const id = typeof row.id === "string" && row.id.trim().length > 0 ? row.id.trim() : `legacy-${inferredSlug}`;
+    const name = typeof row.name === "string" && row.name.trim().length > 0 ? row.name.trim() : inferredSlug;
+    const role = typeof row.role === "string" && row.role.trim().length > 0 ? row.role.trim() : "Generalist";
+    const personalityPath =
+      typeof row.personality_path === "string" && row.personality_path.trim().length > 0
+        ? row.personality_path.trim()
+        : `/souls/${inferredSlug}.md`;
+    const voiceId =
+      typeof row.voice_id === "string" && row.voice_id.trim().length > 0 ? row.voice_id.trim() : "voice_default";
+    const skills = Array.isArray(row.skills)
+      ? row.skills.map((item) => String(item).trim()).filter((item) => item.length > 0)
+      : [];
+    const memoryAccess: MemoryAccess = row.memory_access === "global" ? "global" : "private";
+    const status: AgentStatus =
+      row.status === "busy" || row.status === "sleeping" || row.status === "idle" ? row.status : "idle";
+
+    return {
+      id,
+      name,
+      role,
+      personality_path: personalityPath,
+      voice_id: voiceId,
+      skills,
+      memory_access: memoryAccess,
+      status
     };
   }
 }

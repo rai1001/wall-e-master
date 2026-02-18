@@ -42,7 +42,7 @@ Last update: 2026-02-18
    - middleware and E2E tests for permission-save behavior
 14. Agent registry persistence:
    - `AgentRegistry` now persists to disk (`agents-registry.json`)
-   - survives middleware restarts when using `CLOWOS_AGENTS_DIR` or `CLOWOS_AGENT_REGISTRY_PATH`
+   - survives middleware restarts when using `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
    - persistence regression test covers restart/reload behavior
 
 ## In Progress
