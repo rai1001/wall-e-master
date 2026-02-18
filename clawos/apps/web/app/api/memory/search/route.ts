@@ -5,7 +5,7 @@ import { fetchMiddleware, serviceUnavailableResponse } from "../../../../lib/mid
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q") ?? "";
-  const projectId = searchParams.get("project_id") ?? "proj_001";
+  const projectId = searchParams.get("project_id")?.trim() ?? "";
 
   if (!query.trim()) {
     return NextResponse.json(
@@ -23,9 +23,10 @@ export async function GET(req: Request) {
   }
 
   try {
-    const upstream = await fetchMiddleware(
-      `/api/memory/search?q=${encodeURIComponent(query)}&project_id=${encodeURIComponent(projectId)}`
-    );
+    const upstreamPath = projectId
+      ? `/api/memory/search?q=${encodeURIComponent(query)}&project_id=${encodeURIComponent(projectId)}`
+      : `/api/memory/search?q=${encodeURIComponent(query)}`;
+    const upstream = await fetchMiddleware(upstreamPath);
     const payload = await upstream.json();
     return NextResponse.json(payload, { status: upstream.status });
   } catch {

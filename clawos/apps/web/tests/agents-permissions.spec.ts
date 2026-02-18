@@ -60,6 +60,6 @@ test("agents view updates permissions and reflects new values", async ({ page })
   await page.getByLabel("Memoria Lince").selectOption("global");
   await page.getByRole("button", { name: "Guardar permisos Lince" }).click();
 
-  await expect(page.getByText("memoria global")).toBeVisible();
+  await expect(page.getByText("Investigador | memoria global | skills: python")).toBeVisible();
   await expect(page.getByText("skills: python")).toBeVisible();
 });

@@ -44,15 +44,19 @@ Last update: 2026-02-18
    - `AgentRegistry` now persists to disk (`agents-registry.json`)
    - survives middleware restarts when using `CLAWOS_AGENTS_DIR` or `CLAWOS_AGENT_REGISTRY_PATH`
    - persistence regression test covers restart/reload behavior
+   - first-run migration bootstraps legacy `*.config.json` agent files into registry
+15. Semantic global search (`Cmd+K`) for non-technical users:
+   - top-level "Buscar memoria global" launcher in app header
+   - keyboard shortcut opens global search dialog (`Ctrl+K` / `Cmd+K`)
+   - query runs against `/api/memory/search` without forced `project_id`
+   - E2E coverage validates shortcut flow and shared-memory results rendering
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Agent registry migration strategy (import existing agents on first run)
 
 ## Next (Guide-Aligned)
 
-1. Add semantic global search UI (`Cmd+K`) backed by `/api/memory/search`
-2. Add Tailscale/Cloudflare deployment helpers and security checklist automation
-3. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
-4. Add cost/control widgets per agent and project
+1. Add Tailscale/Cloudflare deployment helpers and security checklist automation
+2. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
+3. Add cost/control widgets per agent and project

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { GlobalMemorySearch } from "../components/global-memory-search";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,6 +25,9 @@ export default function RootLayout({
               <Link href="/agents">Agentes</Link>
               <Link href="/agents/new">Crear Agente</Link>
             </nav>
+            <div className="header-tools">
+              <GlobalMemorySearch />
+            </div>
           </header>
           {children}
         </main>

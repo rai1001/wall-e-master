@@ -155,3 +155,13 @@ Risks: Corrupted registry JSON is currently treated as empty registry; no automa
 Validation done: pnpm --filter @clawos/middleware test agent.registry.persistence.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Agent registry now reads/writes disk-backed JSON with configurable path, and restart persistence is verified by test.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add non-technical global semantic search with Cmd/Ctrl+K.
+Phase: Phase 3
+Rules checked: 1, 2, 3, 6, 8
+Risks: Broad unscoped global queries can return mixed-project context unless user includes project terms.
+Validation done: pnpm --filter @clawos/web test:e2e tests/global-memory-search.spec.ts; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/middleware test
+Outcome: Header-level global search launcher + keyboard shortcut now queries shared memory without forced project filter and presents results in plain-language modal UX.
+```

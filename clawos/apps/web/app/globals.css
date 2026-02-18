@@ -28,6 +28,7 @@ a {
   display: flex;
   gap: 12px;
   margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .top-nav a {
@@ -67,4 +68,109 @@ a {
 .muted {
   color: #4b5563;
   font-size: 0.95rem;
+}
+
+.header-tools {
+  margin-top: 12px;
+}
+
+.global-search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shortcut-key {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  color: #4b5563;
+  background: #f9fafb;
+}
+
+.command-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px 24px;
+  z-index: 50;
+}
+
+.command-dialog {
+  width: min(760px, 100%);
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+}
+
+.command-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.close-button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.command-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.command-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+
+.command-status {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px dashed #9ca3af;
+  background: #f9fafb;
+}
+
+.command-results {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.command-results li {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 720px) {
+  .global-search-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .command-overlay {
+    padding-top: 20px;
+  }
+
+  .command-form {
+    flex-direction: column;
+  }
 }
