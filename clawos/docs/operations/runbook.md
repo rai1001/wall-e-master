@@ -20,8 +20,9 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - `CLAWOS_MEMORY_BACKEND=json|lancedb` (default `json`)
    - if `json`: `CLAWOS_MEMORY_PATH` or `CLAWOS_MEMORY_DIR`
    - if `lancedb`: `CLAWOS_MEMORY_LANCEDB_DIR` (or `CLAWOS_MEMORY_DIR/lancedb`)
-   - embedding provider: `CLAWOS_EMBEDDING_PROVIDER=local|google` (default `local`)
+   - embedding provider: `CLAWOS_EMBEDDING_PROVIDER=local|google|openai` (default `local`)
    - if `google`: set `GOOGLE_API_KEY` (optional model override `GOOGLE_EMBEDDING_MODEL`)
+   - if `openai`: set `OPENAI_API_KEY` (optional model override `OPENAI_EMBEDDING_MODEL`)
 7. Knowledge feed/graph persistence path configured (optional but recommended):
    - `CLAWOS_KNOWLEDGE_PATH` or `CLAWOS_KNOWLEDGE_DIR`
 8. Cost summary persistence path configured (optional but recommended):
@@ -116,7 +117,9 @@ Actions:
    - `CLAWOS_MEMORY_BACKEND=json|lancedb`
    - json mode: `CLAWOS_MEMORY_PATH`/`CLAWOS_MEMORY_DIR` writable
    - lancedb mode: `CLAWOS_MEMORY_LANCEDB_DIR` writable
-   - embedding mode: if `CLAWOS_EMBEDDING_PROVIDER=google`, verify `GOOGLE_API_KEY` and outbound network access
+   - embedding mode:
+     - `google`: verify `GOOGLE_API_KEY` and outbound network access
+     - `openai`: verify `OPENAI_API_KEY` and outbound network access
 
 ### 3.1. Knowledge feed/graph is empty after restart
 

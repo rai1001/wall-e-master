@@ -295,3 +295,13 @@ Risks: Event compatibility depends on emitter payload shape (`type`, `project_id
 Validation done: pnpm --filter @clawos/middleware test openclaw.bridge.test.ts bridge.cost-telemetry.test.ts costs.summary.test.ts; pnpm --filter @clawos/middleware test
 Outcome: OpenClaw bridge now parses usage telemetry events and records them directly in shared cost store used by cost APIs, with end-to-end regression coverage.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add OpenAI embedding provider support in shared memory engine.
+Phase: Phase 1
+Rules checked: 2, 3, 6, 7, 8
+Risks: OpenAI embedding mode depends on valid `OPENAI_API_KEY` and outbound network availability.
+Validation done: pnpm --filter @clawos/middleware test memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Embedding provider registry now supports `openai`, memory vectorization can use configurable OpenAI embeddings model, and regression tests verify both configuration guardrails and successful provider flow.
+```

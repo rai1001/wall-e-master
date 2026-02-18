@@ -54,6 +54,12 @@ interface GoogleEmbeddingPayload {
   }>;
 }
 
+interface OpenAiEmbeddingPayload {
+  data?: Array<{
+    embedding?: unknown[];
+  }>;
+}
+
 class GoogleEmbeddingProvider implements EmbeddingProvider {
   private readonly apiKey: string;
   private readonly model: string;
@@ -123,6 +129,53 @@ class GoogleEmbeddingProvider implements EmbeddingProvider {
   }
 }
 
+class OpenAiEmbeddingProvider implements EmbeddingProvider {
+  private readonly apiKey: string;
+  private readonly model: string;
+
+  constructor(apiKey: string, model = process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small") {
+    this.apiKey = apiKey;
+    this.model = model;
+  }
+
+  async embed(text: string, _task: EmbeddingTask): Promise<number[]> {
+    let response: Response;
+    try {
+      response = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: this.model,
+          input: text
+        })
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "unknown error";
+      throw new EmbeddingRuntimeError(`OpenAI embeddings request failed: ${message}`);
+    }
+
+    if (!response.ok) {
+      throw new EmbeddingRuntimeError(`OpenAI embeddings request failed with status ${response.status}`);
+    }
+
+    const payload = (await response.json()) as OpenAiEmbeddingPayload;
+    const rawValues = payload.data?.[0]?.embedding;
+    if (!Array.isArray(rawValues)) {
+      throw new EmbeddingRuntimeError("OpenAI embeddings response did not include vector values.");
+    }
+
+    const numericValues = rawValues.map((value) => Number(value));
+    if (!numericValues.every((value) => Number.isFinite(value))) {
+      throw new EmbeddingRuntimeError("OpenAI embeddings response included invalid vector values.");
+    }
+
+    return normalizeVector(numericValues);
+  }
+}
+
 function createEmbeddingProviderFromEnv(): EmbeddingProvider {
   const provider = String(process.env.CLAWOS_EMBEDDING_PROVIDER ?? "local").trim().toLowerCase();
 
@@ -139,6 +192,15 @@ function createEmbeddingProviderFromEnv(): EmbeddingProvider {
     return new GoogleEmbeddingProvider(apiKey);
   }
 
+  if (provider === "openai") {
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    if (!apiKey) {
+      throw new EmbeddingConfigurationError("Set OPENAI_API_KEY when CLAWOS_EMBEDDING_PROVIDER=openai.");
+    }
+
+    return new OpenAiEmbeddingProvider(apiKey);
+  }
+
   throw new EmbeddingConfigurationError(`Unsupported CLAWOS_EMBEDDING_PROVIDER: ${provider}`);
 }
 
@@ -148,6 +210,7 @@ export {
   EmbeddingRuntimeError,
   LocalEmbeddingProvider,
   GoogleEmbeddingProvider,
+  OpenAiEmbeddingProvider,
   createEmbeddingProviderFromEnv
 };
 export type { EmbeddingTask, EmbeddingProvider };

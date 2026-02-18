@@ -131,6 +131,11 @@ Last update: 2026-02-18
    - OpenClaw websocket bridge now parses `usage_telemetry` stream events
    - bridge events are auto-recorded into shared cost store (same source used by `/api/costs/summary`)
    - new integration test validates end-to-end flow: websocket event -> persisted cost summary
+32. OpenAI embedding provider support:
+   - embedding provider registry now supports `CLAWOS_EMBEDDING_PROVIDER=openai`
+   - memory pipeline calls OpenAI embeddings API with configurable model (`OPENAI_EMBEDDING_MODEL`)
+   - actionable configuration error when `OPENAI_API_KEY` is missing
+   - regression tests cover openai config error and successful embedding flow
 
 ## In Progress
 
@@ -139,4 +144,4 @@ Last update: 2026-02-18
 ## Next (Guide-Aligned)
 
 1. Optional: define and document canonical OpenClaw `usage_telemetry` event schema for production emitter compatibility
-2. Optional: add OpenAI/Ollama embedding adapters behind current provider registry
+2. Optional: add Ollama embedding adapter behind current provider registry
