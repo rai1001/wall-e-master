@@ -85,3 +85,13 @@ Risks:
 Validation done:
 Outcome:
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Harden voice/API boundary and keep UX voice flow simple for non-technical users.
+Phase: Phase 3 and Phase 4
+Rules checked: 1, 2, 5, 6, 7, 8
+Risks: In-memory rate limit store is node-local only (not distributed); request logs are baseline and may need additional redaction rules.
+Validation done: pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e
+Outcome: Added request_id + structured request logs, API rate limiting, voice payload validation (400/413), updated contracts, and UI voice mode with state feedback.
+```
