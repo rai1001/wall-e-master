@@ -62,6 +62,12 @@ Last update: 2026-02-18
    - optional policy guard `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true`
    - global-memory elevation now returns `403 policy_denied` without explicit approval header
    - log redaction tests for tokens/audio/api keys in observability pipeline
+18. Cost/control widget by project and agent:
+   - new middleware endpoint `GET/PATCH /api/costs/summary`
+   - per-agent cost breakdown and project budget status (`within_budget|near_limit|over_budget`)
+   - guided control actions returned by API for non-technical operators
+   - `/projects` now includes `Control de Costos` card with budget update flow
+   - middleware and E2E tests for cost summary and budget update behavior
 
 ## In Progress
 
@@ -70,5 +76,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Add cost/control widgets per agent and project
-2. Extend observability dashboards and alert-ready counters
+1. Extend observability dashboards and alert-ready counters
+2. Add memory pinning/reinforcement controls in UI

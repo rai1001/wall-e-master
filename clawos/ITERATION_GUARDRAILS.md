@@ -185,3 +185,13 @@ Risks: Taxonomy mapping is code-based and must stay synced when new error codes 
 Validation done: pnpm --filter @clawos/middleware test policy.denial.test.ts observability.redaction.test.ts voice.security.test.ts auth.required.test.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added observability service with sensitive-data redaction, security event logs (`auth_denied`, `rate_limit_denied`, `global_memory_access_denied`), and policy guard for global-memory elevation.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add cost control widget by project and agent for non-technical operations.
+Phase: Phase 3
+Rules checked: 2, 6, 7, 8
+Risks: Cost values are estimated and in-memory baseline; production token accounting integration remains pending.
+Validation done: pnpm --filter @clawos/middleware test costs.summary.test.ts; pnpm --filter @clawos/web test:e2e tests/cost-control-widget.spec.ts tests/projects-live-data.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/api/costs/summary` API and project UI card to monitor spend, update budgets, and surface per-agent cost + control actions.
+```

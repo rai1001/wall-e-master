@@ -361,6 +361,62 @@ Response `200`:
 }
 ```
 
+### `GET /api/costs/summary?project_id=<id>`
+
+Return project-level cost summary with per-agent breakdown.
+
+Response `200`:
+
+```json
+{
+  "project_id": "proj_001",
+  "spent_usd": 12.4,
+  "budget_usd": 20,
+  "remaining_usd": 7.6,
+  "status": "within_budget",
+  "control_actions": ["Revisar agentes con mayor gasto y pausar los no criticos."],
+  "agents": [
+    {
+      "agent_id": "lince",
+      "name": "Lince",
+      "tokens_in": 11200,
+      "tokens_out": 6400,
+      "estimated_usd": 8.35,
+      "last_activity": "2026-02-18T11:00:00Z"
+    }
+  ],
+  "updated_at": "2026-02-18T11:00:00Z"
+}
+```
+
+### `PATCH /api/costs/summary`
+
+Update project budget and return recalculated cost control status.
+
+Request:
+
+```json
+{
+  "project_id": "proj_001",
+  "budget_usd": 25
+}
+```
+
+Response `200`:
+
+```json
+{
+  "project_id": "proj_001",
+  "spent_usd": 12.4,
+  "budget_usd": 25,
+  "remaining_usd": 12.6,
+  "status": "within_budget",
+  "control_actions": ["Mantener monitoreo semanal de costo por agente."],
+  "agents": [],
+  "updated_at": "2026-02-18T11:00:00Z"
+}
+```
+
 ### `GET /api/security/checklist`
 
 Return automated remote-access readiness checks and guided tunnel commands.

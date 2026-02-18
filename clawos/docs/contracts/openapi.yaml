@@ -260,6 +260,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProjectStatusResponse"
+  /costs/summary:
+    get:
+      summary: Cost summary by project and agent
+      parameters:
+        - in: query
+          name: project_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cost summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectCostSummaryResponse"
+    patch:
+      summary: Update project budget and return recalculated summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProjectBudgetRequest"
+      responses:
+        "200":
+          description: Updated cost summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectCostSummaryResponse"
+        "400":
+          description: Invalid budget payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /security/checklist:
     get:
       summary: Automated remote-access security checklist
@@ -600,6 +637,65 @@ components:
             $ref: "#/components/schemas/SecurityCheck"
         helper_commands:
           $ref: "#/components/schemas/SecurityHelperCommands"
+
+    AgentCostSummary:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        name:
+          type: string
+        tokens_in:
+          type: integer
+        tokens_out:
+          type: integer
+        estimated_usd:
+          type: number
+          format: float
+        last_activity:
+          type: string
+          format: date-time
+
+    ProjectCostSummaryResponse:
+      type: object
+      properties:
+        project_id:
+          type: string
+        spent_usd:
+          type: number
+          format: float
+        budget_usd:
+          type: number
+          format: float
+        remaining_usd:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [within_budget, near_limit, over_budget]
+        control_actions:
+          type: array
+          items:
+            type: string
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentCostSummary"
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateProjectBudgetRequest:
+      type: object
+      required:
+        - project_id
+        - budget_usd
+      properties:
+        project_id:
+          type: string
+        budget_usd:
+          type: number
+          format: float
 
     RemoteAccessSummary:
       type: object

@@ -50,6 +50,8 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
    - `GET /api/projects/status?project_id=proj_001` without token should return `401`
 4. Security checklist check:
    - `GET /api/security/checklist` with token should return `200` and actionable `checks[]`
+5. Cost summary check:
+   - `GET /api/costs/summary?project_id=proj_001` with token should return `200`
 
 ## Authentication Check
 
@@ -113,6 +115,13 @@ Actions:
 1. verify if `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true`
 2. resend request with header `x-clawos-global-memory-approved: true` only after approval
 3. check logs for `security_event=global_memory_access_denied` entries
+
+### 7. Project cost status becomes `over_budget`
+
+Actions:
+1. call `GET /api/costs/summary?project_id=<id>` and identify top spending agents
+2. apply mitigation from `control_actions[]`
+3. if needed, update budget with `PATCH /api/costs/summary`
 
 ## Deployment Safety
 
