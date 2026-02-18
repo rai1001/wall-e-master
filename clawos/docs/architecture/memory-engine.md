@@ -15,7 +15,8 @@ Rationale:
 - Middleware supports dual backend selection via `CLAWOS_MEMORY_BACKEND=json|lancedb`.
 - `json` mode preserves lightweight file persistence for local bootstrap environments.
 - `lancedb` mode provides local vector table persistence for `add/search/pin`.
-- Current LanceDB embedding path uses deterministic local vectors for offline reliability; provider-backed embeddings are planned as an optional upgrade.
+- Embedding providers are selectable via `CLAWOS_EMBEDDING_PROVIDER=local|google`.
+- Google mode uses Gemini embeddings (`GOOGLE_API_KEY`, optional `GOOGLE_EMBEDDING_MODEL`) and keeps fixed vector dimensionality for stable LanceDB schema.
 
 ## Memory Layers
 

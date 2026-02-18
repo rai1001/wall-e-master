@@ -117,6 +117,11 @@ Last update: 2026-02-18
    - LanceDB local table persistence with `add/search/pin` parity
    - async memory flow wired through event bus and memory routes
    - regression coverage added for LanceDB directory-backed restart behavior
+29. Google embeddings support for shared memory:
+   - new embedding provider registry (`CLAWOS_EMBEDDING_PROVIDER=local|google`)
+   - Google Gemini embedding integration with actionable config/runtime error handling
+   - memory routes now return taxonomy-aware dependency errors (`503/502`) for embedding provider failures
+   - regression tests added for missing `GOOGLE_API_KEY` and successful Google embedding request path
 
 ## In Progress
 
@@ -125,4 +130,4 @@ Last update: 2026-02-18
 ## Next (Guide-Aligned)
 
 1. Optional: wire token-accurate cost accounting from model/provider usage telemetry
-2. Optional: replace deterministic local embeddings in LanceDB mode with provider-backed embeddings (OpenAI/Ollama)
+2. Optional: add OpenAI/Ollama embedding adapters behind current provider registry

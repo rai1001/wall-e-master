@@ -265,3 +265,13 @@ Risks: Current LanceDB semantic vector uses deterministic local embedding; produ
 Validation done: pnpm --filter @clawos/middleware test memory.lancedb.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added `CLAWOS_MEMORY_BACKEND=json|lancedb`, implemented LanceDB add/search/pin parity, updated memory bus/routes to async flow, and added restart-persistence regression coverage.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add Google embedding provider support for LanceDB shared memory.
+Phase: Phase 1
+Rules checked: 2, 3, 6, 7, 8
+Risks: Google provider depends on external API/network availability and valid `GOOGLE_API_KEY`.
+Validation done: pnpm --filter @clawos/middleware test memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added embedding provider registry (`local|google`), integrated Google embedding calls into memory add/search pipeline, and added actionable dependency errors on memory routes.
+```

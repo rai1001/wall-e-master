@@ -3,6 +3,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { connect, type Table } from "@lancedb/lancedb";
 
+import { createEmbeddingProviderFromEnv, type EmbeddingProvider } from "./embedding-provider";
+
 interface MemorySearchResult {
   id: string;
   content: string;
@@ -49,13 +51,13 @@ interface LanceMemoryRow {
 }
 
 const LANCEDB_TABLE_NAME = "memory_chunks";
-const VECTOR_DIMENSIONS = 16;
 
 class MemoryStore {
   private readonly backend: MemoryBackend;
   private readonly storagePath?: string;
   private readonly rows: MemorySearchResult[] = [];
   private lanceTablePromise: Promise<Table> | null = null;
+  private embeddingProvider: EmbeddingProvider | null = null;
 
   constructor(storagePath?: string) {
     this.storagePath = storagePath;
@@ -301,7 +303,7 @@ class MemoryStore {
     const dbDir = this.resolveLanceDbDir();
     mkdirSync(dbDir, { recursive: true });
     const db = await connect(dbDir);
-    const seedRows = this.buildSeedRows().map((row) => this.toLanceRow(row));
+    const seedRows = await Promise.all(this.buildSeedRows().map(async (row) => this.toLanceRow(row)));
 
     try {
       const table = await db.openTable(LANCEDB_TABLE_NAME);
@@ -315,7 +317,8 @@ class MemoryStore {
     }
   }
 
-  private toLanceRow(row: MemorySearchResult): LanceMemoryRow {
+  private async toLanceRow(row: MemorySearchResult): Promise<LanceMemoryRow> {
+    const vector = await this.embedText(`${row.content} ${row.metadata.tags.join(" ")}`, "document");
     return {
       id: row.id,
       content: row.content,
@@ -328,7 +331,7 @@ class MemoryStore {
       timestamp: row.metadata.timestamp,
       tags: row.metadata.tags.join(","),
       pinned: row.pinned === true,
-      vector: this.embedText(`${row.content} ${row.metadata.tags.join(" ")}`)
+      vector
     };
   }
 
@@ -422,14 +425,17 @@ class MemoryStore {
     return value.replace(/'/g, "''");
   }
 
-  private embedText(text: string): number[] {
-    const output = Array.from({ length: VECTOR_DIMENSIONS }, () => 0);
-    for (let index = 0; index < text.length; index += 1) {
-      output[index % VECTOR_DIMENSIONS] += text.charCodeAt(index) % 127;
+  private getEmbeddingProvider(): EmbeddingProvider {
+    if (!this.embeddingProvider) {
+      this.embeddingProvider = createEmbeddingProviderFromEnv();
     }
 
-    const norm = Math.sqrt(output.reduce((acc, value) => acc + value * value, 0)) || 1;
-    return output.map((value) => value / norm);
+    return this.embeddingProvider;
+  }
+
+  private async embedText(text: string, task: "query" | "document"): Promise<number[]> {
+    const provider = this.getEmbeddingProvider();
+    return provider.embed(text, task);
   }
 
   private async addToLanceDb(input: MemoryIngestInput): Promise<string> {
@@ -439,6 +445,7 @@ class MemoryStore {
     const tags = input.metadata.tags ?? [];
     const content = input.content;
     const score = Math.min(0.99, 0.5 + priority / 20);
+    const vector = await this.embedText(`${content} ${tags.join(" ")}`, "document");
 
     const row: LanceMemoryRow = {
       id,
@@ -452,7 +459,7 @@ class MemoryStore {
       timestamp: input.metadata.timestamp ?? new Date().toISOString(),
       tags: tags.join(","),
       pinned: false,
-      vector: this.embedText(`${content} ${tags.join(" ")}`)
+      vector
     };
 
     await table.add([row]);
@@ -466,7 +473,7 @@ class MemoryStore {
     }
 
     const table = await this.getLanceTable();
-    const vector = this.embedText(normalized);
+    const vector = await this.embedText(normalized, "query");
     const rawRows = (await (table as any).vectorSearch(vector).limit(50).toArray()) as Array<Record<string, unknown>>;
 
     const rankedRows = rawRows
