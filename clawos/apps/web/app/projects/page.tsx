@@ -52,6 +52,18 @@ interface KnowledgeGraphResponse {
   edges: KnowledgeGraphEdge[];
 }
 
+interface KnowledgeFeedEntry {
+  id: string;
+  agent_id: string;
+  message: string;
+  timestamp: string;
+}
+
+interface KnowledgeFeedResponse {
+  project_id: string;
+  entries: KnowledgeFeedEntry[];
+}
+
 function formatUsd(value: number): string {
   return `$${value.toFixed(2)}`;
 }
@@ -90,14 +102,18 @@ export default function ProjectsPage() {
   const [status, setStatus] = useState<ProjectStatusResponse | null>(null);
   const [costSummary, setCostSummary] = useState<CostSummaryResponse | null>(null);
   const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraphResponse | null>(null);
+  const [knowledgeFeed, setKnowledgeFeed] = useState<KnowledgeFeedEntry[]>([]);
   const [budgetDraft, setBudgetDraft] = useState("");
   const [error, setError] = useState<string>("");
   const [costError, setCostError] = useState<string>("");
   const [knowledgeError, setKnowledgeError] = useState<string>("");
+  const [feedError, setFeedError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [budgetUpdating, setBudgetUpdating] = useState(false);
 
   useEffect(() => {
+    let active = true;
+
     const load = async () => {
       let projectId = "proj_001";
 
@@ -108,6 +124,9 @@ export default function ProjectsPage() {
         });
 
         const payload = await response.json();
+        if (!active) {
+          return;
+        }
         if (!response.ok) {
           setError(payload?.error?.message ?? "No pudimos cargar el estado del proyecto.");
           return;
@@ -117,7 +136,9 @@ export default function ProjectsPage() {
         setStatus(projectStatus);
         projectId = projectStatus.project_id || projectId;
       } catch {
-        setError("No pudimos cargar el estado del proyecto.");
+        if (active) {
+          setError("No pudimos cargar el estado del proyecto.");
+        }
       }
 
       try {
@@ -126,6 +147,9 @@ export default function ProjectsPage() {
           cache: "no-store"
         });
         const costPayload = await costResponse.json();
+        if (!active) {
+          return;
+        }
         if (!costResponse.ok) {
           setCostError(costPayload?.error?.message ?? "No pudimos cargar el resumen de costos.");
         } else {
@@ -134,7 +158,9 @@ export default function ProjectsPage() {
           setBudgetDraft(String(summary.budget_usd));
         }
       } catch {
-        setCostError("No pudimos cargar el resumen de costos.");
+        if (active) {
+          setCostError("No pudimos cargar el resumen de costos.");
+        }
       }
 
       try {
@@ -143,19 +169,55 @@ export default function ProjectsPage() {
           cache: "no-store"
         });
         const graphPayload = await graphResponse.json();
+        if (!active) {
+          return;
+        }
         if (!graphResponse.ok) {
           setKnowledgeError(graphPayload?.error?.message ?? "No pudimos cargar el mapa de conocimiento.");
         } else {
           setKnowledgeGraph(graphPayload as KnowledgeGraphResponse);
         }
       } catch {
-        setKnowledgeError("No pudimos cargar el mapa de conocimiento.");
+        if (active) {
+          setKnowledgeError("No pudimos cargar el mapa de conocimiento.");
+        }
+      }
+
+      try {
+        const feedResponse = await fetch(`/api/knowledge/feed?project_id=${encodeURIComponent(projectId)}`, {
+          method: "GET",
+          cache: "no-store"
+        });
+        const feedPayload = await feedResponse.json();
+        if (!active) {
+          return;
+        }
+        if (!feedResponse.ok) {
+          setFeedError(feedPayload?.error?.message ?? "No pudimos cargar el feed global.");
+        } else {
+          const feed = feedPayload as KnowledgeFeedResponse;
+          setKnowledgeFeed(Array.isArray(feed.entries) ? feed.entries : []);
+        }
+      } catch {
+        if (active) {
+          setFeedError("No pudimos cargar el feed global.");
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     void load();
+    const interval = window.setInterval(() => {
+      void load();
+    }, 5_000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const updateBudget = async () => {
@@ -285,6 +347,24 @@ export default function ProjectsPage() {
             )}
           </>
         ) : null}
+      </article>
+      <article className="card">
+        <h2>Feed Global de Hallazgos</h2>
+        <p className="muted">Lo ultimo que descubrieron tus agentes en lenguaje simple.</p>
+        {loading ? <p>Cargando feed...</p> : null}
+        {feedError ? <p className="muted">{feedError}</p> : null}
+        {knowledgeFeed.length > 0 ? (
+          <ul>
+            {knowledgeFeed.slice(0, 6).map((entry) => (
+              <li key={entry.id}>
+                {entry.message}
+                <span className="muted"> ({entry.agent_id})</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">Aun no hay hallazgos compartidos para este proyecto.</p>
+        )}
       </article>
     </section>
   );

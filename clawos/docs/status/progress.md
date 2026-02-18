@@ -146,6 +146,13 @@ Last update: 2026-02-18
    - LanceDB memory vectorization now supports local Ollama embeddings over HTTP (`/api/embed`)
    - optional env overrides added for local endpoint/model (`OLLAMA_EMBEDDING_BASE_URL`, `OLLAMA_EMBEDDING_MODEL`)
    - regression tests cover successful Ollama embedding request flow
+35. Runtime orchestration UX and bridge parity:
+   - voice pipeline now routes transcripts to OpenClaw bridge (`agent_request`) and returns real daemon response
+   - `/api/voice/process` now returns `openclaw_routed` to indicate bridge delivery outcome
+   - new project runtime event store persists `thought/action` events from bridge stream
+   - new endpoint `GET /api/projects/events` powers live "Terminal de Pensamiento" updates
+   - `/projects` now refreshes status/cost/knowledge/feed periodically for low-friction monitoring
+   - regression coverage added for bridge voice routing, project events API, live thought terminal, and discovery feed UI
 
 ## In Progress
 

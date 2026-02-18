@@ -345,6 +345,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /projects/events:
+    get:
+      operationId: getProjectEvents
+      summary: Recent thought and action events for one project
+      parameters:
+        - in: query
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Project runtime events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectEventsResponse"
+        "400":
+          description: Invalid project query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /costs/summary:
     get:
       operationId: getCostSummary
@@ -757,6 +788,9 @@ components:
           type: string
         tts_audio_url:
           type: string
+        openclaw_routed:
+          type: boolean
+          description: True when transcript was delivered to OpenClaw websocket bridge.
 
     ProjectStatusResponse:
       type: object
@@ -790,6 +824,44 @@ components:
         updated_at:
           type: string
           format: date-time
+
+    ProjectEvent:
+      type: object
+      required:
+        - id
+        - project_id
+        - kind
+        - content
+        - timestamp
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+        agent_id:
+          type: string
+          nullable: true
+        agent_name:
+          type: string
+          nullable: true
+        kind:
+          type: string
+          enum: [thought, action]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ProjectEventsResponse:
+      type: object
+      properties:
+        project_id:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectEvent"
 
     SecurityChecklistResponse:
       type: object

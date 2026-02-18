@@ -325,3 +325,13 @@ Risks: Ollama mode depends on local service availability at configured base URL 
 Validation done: pnpm --filter @clawos/middleware test src/__tests__/memory.google-embedding.test.ts; pnpm --filter @clawos/middleware test
 Outcome: Added `ollama` embedding provider path (`/api/embed`) with env-configurable endpoint/model, plus regression coverage and runbook/env updates.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Close remaining runtime UX gaps (live thought terminal, bridge-backed voice response, and real-time discovery visibility).
+Phase: Phase 3 and Phase 4
+Rules checked: 1, 2, 6, 7, 8
+Risks: Project event timeline currently uses JSON-file persistence and capped retention per project (200 rows), so long-running projects may need archive/export strategy.
+Validation done: pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build; pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
+Outcome: Voice route now dispatches transcript to OpenClaw and returns daemon response + delivery flag, bridge runtime events persist to `/api/projects/events`, and web thought/project views now refresh from live middleware data with new regression coverage.
+```

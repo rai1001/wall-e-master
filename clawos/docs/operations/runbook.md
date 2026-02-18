@@ -32,11 +32,13 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
    - `CLAWOS_OBSERVABILITY_PATH` or `CLAWOS_OBSERVABILITY_DIR`
 10. Voice output persistence path configured (optional but recommended):
    - `CLAWOS_VOICE_OUTPUT_DIR`
-11. Remote access posture inputs configured (recommended):
+11. Project runtime event persistence path configured (optional but recommended):
+   - `CLAWOS_PROJECT_EVENTS_PATH` or `CLAWOS_PROJECT_EVENTS_DIR`
+12. Remote access posture inputs configured (recommended):
    - `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
    - `REMOTE_ACCESS_PROVIDER=none|tailscale|cloudflare`
    - `TAILSCALE_FUNNEL_URL` or `CLOUDFLARE_TUNNEL_URL` when provider is enabled
-12. Optional policy hardening:
+13. Optional policy hardening:
    - `CLAWOS_REQUIRE_GLOBAL_MEMORY_APPROVAL=true` to require explicit header before global memory elevation
 
 ## Startup
@@ -72,6 +74,8 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
    - `POST /api/costs/usage` with token should return `202` for valid telemetry payload
 6. Observability dashboard check:
    - `GET /api/observability/summary?window_minutes=60` with token should return `200`
+7. Runtime event stream check:
+   - `GET /api/projects/events?project_id=proj_001&limit=5` with token should return `200`
 
 ## Authentication Check
 
@@ -200,6 +204,14 @@ Actions:
 1. call `GET /api/projects/status?project_id=<id>&probe=true`
 2. verify OpenClaw daemon is reachable on `OPENCLAW_WS_URL` (default `ws://127.0.0.1:18789`)
 3. verify local firewall/network policy allows localhost websocket connection
+
+### 12. Thought terminal remains empty
+
+Actions:
+1. verify bridge connectivity with `GET /api/projects/status?project_id=<id>&probe=true`
+2. confirm OpenClaw stream is emitting `agent_thought` or `agent_action` events
+3. query `GET /api/projects/events?project_id=<id>&limit=10` and validate rows are returned
+4. verify `CLAWOS_PROJECT_EVENTS_PATH`/`CLAWOS_PROJECT_EVENTS_DIR` points to writable storage
 
 ## Deployment Safety
 

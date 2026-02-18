@@ -6,7 +6,13 @@ ClawOS is a visual operating layer for autonomous agents with shared memory, voi
 
 ## Current Status
 
-This repository currently contains the planning and documentation baseline required to start implementation.
+Core implementation is active and runnable:
+
+- Middleware APIs for agents, memory, voice, project status/events, security, observability, and costs
+- Web app (Next.js) with low-friction views for chat, projects, security, and agent management
+- WebSocket bridge to OpenClaw daemon (`ws://127.0.0.1:18789`)
+- Shared memory persistence and optional LanceDB backend
+- Voice flow with STT/TTS providers and persisted audio output
 
 ## Scope
 
@@ -21,6 +27,9 @@ This repository currently contains the planning and documentation baseline requi
 ```text
 clawos/
   README.md
+  apps/
+    middleware/
+    web/
   docs/
     architecture/
     contracts/
@@ -31,7 +40,7 @@ clawos/
     testing/
 ```
 
-## Planned Stack
+## Stack
 
 - Frontend: Next.js 15 (App Router), Tailwind CSS
 - Middleware: Node.js + Express
@@ -39,6 +48,15 @@ clawos/
 - Streaming: WebSocket bridge to OpenClaw daemon (port 18789)
 - Audio: Whisper for STT, ElevenLabs for TTS
 - Remote Access: Tailscale Funnel
+
+## Run Locally
+
+```bash
+cd clawos
+pnpm install
+pnpm --filter @clawos/middleware exec tsx src/server.ts
+pnpm --filter @clawos/web dev
+```
 
 ## Start Here
 

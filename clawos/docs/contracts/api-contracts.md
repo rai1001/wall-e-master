@@ -305,8 +305,9 @@ Response `200`:
 ```json
 {
   "transcript": "resume project status for today",
-  "agent_response": "Current status summary generated",
-  "tts_audio_url": "/api/voice/output/response_123.mp3"
+  "agent_response": "Estado actualizado desde OpenClaw",
+  "tts_audio_url": "/api/voice/output/response_123.mp3",
+  "openclaw_routed": true
 }
 ```
 
@@ -404,6 +405,43 @@ Response `200`:
     "connected": true
   },
   "updated_at": "2026-02-18T00:00:00Z"
+}
+```
+
+Implementation note:
+
+- `tasks.done` is derived from recent `action` events in project runtime feed.
+- `tasks.doing` reflects current busy agents and active action signal.
+
+### `GET /api/projects/events?project_id=<id>&limit=<n>`
+
+Return latest runtime events produced by OpenClaw bridge (`thought` vs `action`).
+
+Response `200`:
+
+```json
+{
+  "project_id": "proj_001",
+  "events": [
+    {
+      "id": "1739884032000-a1b2c3",
+      "project_id": "proj_001",
+      "agent_id": "lince",
+      "agent_name": "Lince",
+      "kind": "thought",
+      "content": "Analizando hallazgos recientes",
+      "timestamp": "2026-02-18T12:00:00Z"
+    },
+    {
+      "id": "1739884034000-d4e5f6",
+      "project_id": "proj_001",
+      "agent_id": "lince",
+      "agent_name": "Lince",
+      "kind": "action",
+      "content": "Actualizando backlog",
+      "timestamp": "2026-02-18T12:00:02Z"
+    }
+  ]
 }
 ```
 
