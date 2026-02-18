@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { DailyChefOperations } from "../../components/daily-chef-operations";
+
 interface ProjectStatusResponse {
   project_id: string;
   overall_status: string;
@@ -366,6 +368,7 @@ export default function ProjectsPage() {
           <p className="muted">Aun no hay hallazgos compartidos para este proyecto.</p>
         )}
       </article>
+      <DailyChefOperations />
     </section>
   );
 }
