@@ -9,6 +9,11 @@ Operate ClawOS safely on a local machine where OpenClaw is already installed and
 1. OpenClaw daemon active on `ws://127.0.0.1:18789`
 2. Middleware and web app dependencies installed
 3. `API_BEARER_TOKEN` configured for protected API access
+4. Voice provider env configured (or left in mock mode):
+   - `STT_PROVIDER=mock|openai`
+   - `TTS_PROVIDER=mock|elevenlabs`
+   - if `STT_PROVIDER=openai`: `OPENAI_API_KEY`
+   - if `TTS_PROVIDER=elevenlabs`: `ELEVENLABS_API_KEY`
 
 ## Startup
 
@@ -62,7 +67,11 @@ Actions:
 ### 2. Voice endpoint returns errors
 
 Actions:
-1. verify STT/TTS provider keys
+1. verify provider mode:
+   - `STT_PROVIDER` and `TTS_PROVIDER`
+2. verify STT/TTS provider keys
+   - `OPENAI_API_KEY` for OpenAI STT
+   - `ELEVENLABS_API_KEY` for ElevenLabs TTS
 2. check payload size and format
 3. confirm provider network access
 
@@ -88,4 +97,3 @@ pnpm --filter @clawos/middleware test
 pnpm --filter @clawos/web test:e2e
 pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml
 ```
-

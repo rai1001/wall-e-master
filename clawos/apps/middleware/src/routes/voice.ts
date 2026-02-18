@@ -1,18 +1,16 @@
 import { Router } from "express";
 
-import { MockSttProvider } from "../services/stt-provider";
-import { MockTtsProvider } from "../services/tts-provider";
+import { createSttProviderFromEnv } from "../services/stt-provider";
+import { createTtsProviderFromEnv } from "../services/tts-provider";
 
 const voiceRouter = Router();
 const MAX_AUDIO_BYTES = 512_000;
-
-const sttProvider = new MockSttProvider();
-const ttsProvider = new MockTtsProvider();
 
 voiceRouter.post("/process", async (req, res) => {
   const payload = req.body ?? {};
   const audioBase64 = typeof payload.audio_base64 === "string" ? payload.audio_base64.trim() : "";
   const agentId = typeof payload.agent_id === "string" ? payload.agent_id.trim() : "";
+  const voiceId = typeof payload.voice_id === "string" ? payload.voice_id.trim() : "";
 
   if (!audioBase64 || !agentId) {
     return res.status(400).json({
@@ -66,14 +64,47 @@ voiceRouter.post("/process", async (req, res) => {
     });
   }
 
-  const transcript = await sttProvider.transcribe(audioBuffer);
-  const ttsAudioUrl = await ttsProvider.synthesize("Current status summary generated");
+  let sttProvider;
+  let ttsProvider;
+  try {
+    sttProvider = createSttProviderFromEnv();
+    ttsProvider = createTtsProviderFromEnv();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Voice provider configuration is invalid.";
+    return res.status(503).json({
+      error: {
+        code: "provider_configuration_error",
+        message: "Voice providers are not configured correctly",
+        details: {
+          recovery_action: message
+        }
+      }
+    });
+  }
 
-  return res.status(200).json({
-    transcript,
-    agent_response: "Current status summary generated",
-    tts_audio_url: ttsAudioUrl
-  });
+  try {
+    const transcript = await sttProvider.transcribe(audioBuffer);
+    const ttsAudioUrl = await ttsProvider.synthesize("Current status summary generated", {
+      voiceId
+    });
+
+    return res.status(200).json({
+      transcript,
+      agent_response: "Current status summary generated",
+      tts_audio_url: ttsAudioUrl
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Voice provider request failed.";
+    return res.status(502).json({
+      error: {
+        code: "provider_runtime_error",
+        message: "Voice processing failed at external provider",
+        details: {
+          recovery_action: message
+        }
+      }
+    });
+  }
 });
 
 export { voiceRouter };

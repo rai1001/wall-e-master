@@ -16,11 +16,16 @@ Last update: 2026-02-18
    - rate limiting (`429`)
    - voice payload validation (`400` / `413`)
 8. Voice mode UX component with clear states (escuchando/procesando/hablando) and cancel action
+9. Voice provider registry baseline:
+   - `STT_PROVIDER=mock|openai`
+   - `TTS_PROVIDER=mock|elevenlabs`
+   - actionable `503` when provider keys are missing
+   - optional `voice_id` override on `/api/voice/process`
 
 ## In Progress
 
-1. Real STT/TTS provider wiring (Whisper/ElevenLabs adapters beyond mock providers)
-2. Live dashboard data bindings (replace placeholder status cards with middleware data)
+1. Live dashboard data bindings (replace placeholder status cards with middleware data)
+2. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
 
 ## Next (Guide-Aligned)
 

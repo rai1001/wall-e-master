@@ -95,3 +95,13 @@ Risks: In-memory rate limit store is node-local only (not distributed); request 
 Validation done: pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e
 Outcome: Added request_id + structured request logs, API rate limiting, voice payload validation (400/413), updated contracts, and UI voice mode with state feedback.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add real voice provider selection and safe configuration handling.
+Phase: Phase 3
+Rules checked: 1, 2, 6, 7, 8
+Risks: External provider runtime depends on network and third-party availability; current TTS response uses base64 data URL for non-mock mode.
+Validation done: pnpm --filter @clawos/middleware test voice.providers.test.ts; pnpm --filter @clawos/middleware test
+Outcome: Added OpenAI STT and ElevenLabs TTS provider adapters with env-based selection, actionable 503 configuration errors, and updated runbook/contracts.
+```

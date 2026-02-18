@@ -141,6 +141,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: External voice provider runtime failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Voice provider configuration missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /projects/status:
     get:
       summary: Consolidated project status
@@ -388,6 +400,8 @@ components:
         agent_id:
           type: string
         project_id:
+          type: string
+        voice_id:
           type: string
 
     VoiceProcessResponse:

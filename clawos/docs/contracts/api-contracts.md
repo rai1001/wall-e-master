@@ -185,6 +185,7 @@ Request (`application/json`):
 {
   "agent_id": "lince",
   "project_id": "proj_001",
+  "voice_id": "elevenlabs_voice_123",
   "audio_base64": "UklGRiQAAABXQVZF..."
 }
 ```
@@ -223,6 +224,20 @@ Response `429` (rate limited):
     "message": "Too many requests. Please wait and retry.",
     "details": {
       "recovery_action": "Wait a few seconds and retry the same action."
+    }
+  }
+}
+```
+
+Response `503` (provider configuration):
+
+```json
+{
+  "error": {
+    "code": "provider_configuration_error",
+    "message": "Voice providers are not configured correctly",
+    "details": {
+      "recovery_action": "Set OPENAI_API_KEY when STT_PROVIDER=openai."
     }
   }
 }
