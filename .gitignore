@@ -6,6 +6,11 @@ node_modules/
 awesome/
 superpowers/
 
+# Next.js / Playwright artifacts
+clawos/apps/web/.next/
+clawos/apps/web/test-results/
+clawos/apps/web/playwright-report/
+
 # OS/editor
 .DS_Store
 Thumbs.db
