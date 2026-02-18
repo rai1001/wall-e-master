@@ -1,4 +1,5 @@
 import { ClientStream } from "../ws/client-stream";
+import { buildSharedSystemPrompt } from "../prompts/shared-system-prompt";
 
 interface OpenClawBridgeOptions {
   url: string;
@@ -8,6 +9,19 @@ interface OpenClawBridgeOptions {
 interface RecoveryState {
   recovered: boolean;
   attempts: number;
+}
+
+interface AgentRequestInput {
+  agentName: string;
+  projectId: string;
+  allowedTools: string[];
+  memoryScope: "project" | "global";
+  userMessage: string;
+}
+
+interface AgentRequest {
+  systemPrompt: string;
+  message: string;
 }
 
 class OpenClawBridge {
@@ -21,6 +35,18 @@ class OpenClawBridge {
 
   getUrl(): string {
     return this.options.url;
+  }
+
+  buildAgentRequest(input: AgentRequestInput): AgentRequest {
+    return {
+      systemPrompt: buildSharedSystemPrompt({
+        agentName: input.agentName,
+        projectId: input.projectId,
+        allowedTools: input.allowedTools,
+        memoryScope: input.memoryScope
+      }),
+      message: input.userMessage
+    };
   }
 
   async simulateDisconnectAndRecover(): Promise<RecoveryState> {
@@ -48,4 +74,4 @@ class OpenClawBridge {
 }
 
 export { OpenClawBridge };
-export type { OpenClawBridgeOptions, RecoveryState };
+export type { OpenClawBridgeOptions, RecoveryState, AgentRequestInput, AgentRequest };
