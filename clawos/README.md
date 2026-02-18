@@ -58,6 +58,21 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
 pnpm --filter @clawos/web dev
 ```
 
+## Flujo No Tecnico (Chef/Hotel)
+
+- Abre `http://localhost:3100/help` para el Centro de Ayuda integrado.
+- Sigue la guia de arranque rapido: `docs/non-technical/01-EMPEZAR-EN-5-MIN.md`.
+- Valida canales operativos en `/security`:
+  - WhatsApp gateway
+  - Email
+  - Make
+  - ChefOs
+- Ejecuta operacion diaria en `/projects` con el bloque "Operacion diaria Chef".
+- Ante incidencias, usa:
+  - `/security` para probar conexiones
+  - `/projects` para registrar y reintentar envios
+  - `/help/04-solucion-de-problemas` para recuperacion paso a paso
+
 ## Start Here
 
 1. Read `clawos/ITERATION_GUARDRAILS.md` before any iteration
