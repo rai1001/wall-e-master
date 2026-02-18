@@ -1,0 +1,39 @@
+name: ClawOS CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: clawos/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: clawos
+        run: pnpm install --frozen-lockfile
+
+      - name: Middleware tests
+        working-directory: clawos
+        run: pnpm --filter @clawos/middleware test
+
+      - name: Lint OpenAPI
+        working-directory: clawos
+        run: pnpm --package=@redocly/cli dlx redocly lint docs/contracts/openapi.yaml

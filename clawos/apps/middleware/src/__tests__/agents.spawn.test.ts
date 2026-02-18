@@ -13,7 +13,10 @@ describe("agents spawn route", () => {
       memory_access: "global"
     };
 
-    const res = await request(app).post("/api/agents/spawn").send(payload);
+    const res = await request(app)
+      .post("/api/agents/spawn")
+      .set("Authorization", "Bearer dev-token")
+      .send(payload);
 
     expect(res.status).toBe(201);
     expect(res.body.agent.name).toBe("Lince");

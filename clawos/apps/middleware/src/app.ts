@@ -1,16 +1,20 @@
 import express from "express";
 
+import { authMiddleware } from "./middleware/auth";
 import { agentsRouter } from "./routes/agents";
 import { healthRouter } from "./routes/health";
 import { memoryRouter } from "./routes/memory";
+import { projectsRouter } from "./routes/projects";
 import { voiceRouter } from "./routes/voice";
 
 const app = express();
 
 app.use(express.json());
 app.use(healthRouter);
+app.use("/api", authMiddleware);
 app.use("/api/agents", agentsRouter);
 app.use("/api/memory", memoryRouter);
+app.use("/api/projects", projectsRouter);
 app.use("/api/voice", voiceRouter);
 
 export { app };

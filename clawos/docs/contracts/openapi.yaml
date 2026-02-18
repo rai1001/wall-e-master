@@ -5,6 +5,8 @@ info:
   description: Contracts for agent orchestration, shared memory, voice processing, handoff, and project status.
 servers:
   - url: /api
+security:
+  - bearerAuth: []
 paths:
   /agents/spawn:
     post:
@@ -188,6 +190,11 @@ paths:
                 $ref: "#/components/schemas/KnowledgeGraphResponse"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Agent:
       type: object
