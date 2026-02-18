@@ -25,6 +25,7 @@ export default function RootLayout({
               <Link href="/agents">Agentes</Link>
               <Link href="/agents/new">Crear Agente</Link>
               <Link href="/security">Seguridad</Link>
+              <Link href="/help">Ayuda</Link>
             </nav>
             <div className="header-tools">
               <GlobalMemorySearch />
