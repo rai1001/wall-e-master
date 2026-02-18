@@ -30,15 +30,20 @@ Last update: 2026-02-18
    - skills and memory permissions toggles for non-technical users
    - proxy route `/api/agents/spawn` connected to middleware
    - E2E coverage for successful agent creation flow
+12. Agent management view:
+   - backend endpoints `GET /api/agents` and `PATCH /api/agents/:id/status`
+   - web page `/agents` to list agents and actions dormir/despertar
+   - Next.js proxy routes for list and status updates
+   - middleware and E2E tests for full sleep/wake flow
 
 ## In Progress
 
 1. Voice provider persistence for generated audio files (replace inline/base64 output strategy)
-2. Agent list/management view (status, edit permissions, sleep/wake controls)
+2. Agent permission editing flow (skills/memory access updates after creation)
 
 ## Next (Guide-Aligned)
 
 1. Add semantic global search UI (`Cmd+K`) backed by `/api/memory/search`
-2. Implement agent creation wizard with template presets and permission toggles
-3. Add Tailscale/Cloudflare deployment helpers and security checklist automation
-4. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
+2. Add Tailscale/Cloudflare deployment helpers and security checklist automation
+3. Add observability expansion: error taxonomy, policy denial events, and log redaction tests
+4. Add cost/control widgets per agent and project

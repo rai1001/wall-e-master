@@ -100,4 +100,4 @@ class AgentFactory {
 }
 
 export { AgentFactory };
-export type { SpawnAgentInput, SpawnAgentResult };
+export type { Agent, AgentStatus, MemoryAccess, SpawnAgentInput, SpawnAgentResult };

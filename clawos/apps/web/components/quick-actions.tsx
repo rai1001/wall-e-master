@@ -10,6 +10,9 @@ export function QuickActions() {
         <Link className="action-link" href="/agents/new">
           Crear agente
         </Link>
+        <Link className="action-link" href="/agents">
+          Gestionar agentes
+        </Link>
         <button type="button">Buscar memoria</button>
       </div>
     </article>

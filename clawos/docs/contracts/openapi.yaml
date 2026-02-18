@@ -30,6 +30,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /agents:
+    get:
+      summary: List registered agents
+      responses:
+        "200":
+          description: Agent list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentListResponse"
+  /agents/{agentId}/status:
+    patch:
+      summary: Update status for one agent
+      parameters:
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentStatusRequest"
+      responses:
+        "200":
+          description: Agent status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateAgentStatusResponse"
+        "400":
+          description: Invalid status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /memory/search:
     get:
       summary: Hybrid search in shared memory
@@ -280,6 +324,29 @@ components:
           type: array
           items:
             type: string
+
+    AgentListResponse:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agent"
+
+    UpdateAgentStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [idle, busy, sleeping]
+
+    UpdateAgentStatusResponse:
+      type: object
+      properties:
+        agent:
+          $ref: "#/components/schemas/Agent"
 
     MemoryResult:
       type: object

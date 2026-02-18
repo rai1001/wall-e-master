@@ -60,6 +60,53 @@ Request:
 }
 ```
 
+### `GET /api/agents`
+
+Return the current list of known agents.
+
+Response `200`:
+
+```json
+{
+  "agents": [
+    {
+      "id": "1f9f8f52-3308-4c8f-93be-9f812f4a8ccf",
+      "name": "Lince",
+      "role": "Cybersecurity Researcher",
+      "personality_path": "/souls/lince.md",
+      "voice_id": "voice_researcher",
+      "skills": ["browser"],
+      "memory_access": "private",
+      "status": "idle"
+    }
+  ]
+}
+```
+
+### `PATCH /api/agents/:agent_id/status`
+
+Update operational state of an agent (sleep/wake or mark busy).
+
+Request:
+
+```json
+{
+  "status": "sleeping"
+}
+```
+
+Response `200`:
+
+```json
+{
+  "agent": {
+    "id": "1f9f8f52-3308-4c8f-93be-9f812f4a8ccf",
+    "name": "Lince",
+    "status": "sleeping"
+  }
+}
+```
+
 Response `201`:
 
 ```json

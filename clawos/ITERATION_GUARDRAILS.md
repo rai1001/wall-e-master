@@ -125,3 +125,13 @@ Risks: Preset defaults are static and may need tuning per team use case; no agen
 Validation done: pnpm --filter @clawos/web test:e2e tests/agent-wizard.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/agents/new`, `/api/agents/spawn` proxy, non-technical preset/permission form, and E2E verification of spawn payload and success flow.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add agent management list with sleep/wake controls from web UI.
+Phase: Phase 3
+Rules checked: 1, 2, 4, 6, 8
+Risks: Agent registry is currently in-memory for runtime state, so restart clears status list unless agents are respawned.
+Validation done: pnpm --filter @clawos/middleware test agents.management.test.ts; pnpm --filter @clawos/web test:e2e tests/agents-management.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added middleware agent list/status APIs, web `/agents` management view, proxy routes, and end-to-end sleep/wake coverage.
+```

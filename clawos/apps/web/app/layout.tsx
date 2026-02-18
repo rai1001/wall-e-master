@@ -21,6 +21,7 @@ export default function RootLayout({
             <nav className="top-nav">
               <Link href="/">Inicio</Link>
               <Link href="/projects">Proyectos</Link>
+              <Link href="/agents">Agentes</Link>
               <Link href="/agents/new">Crear Agente</Link>
             </nav>
           </header>

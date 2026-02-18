@@ -6,14 +6,22 @@ function buildMiddlewareUrl(pathWithQuery: string): string {
   return `${base}${pathWithQuery}`;
 }
 
-async function fetchMiddleware(pathWithQuery: string): Promise<Response> {
+function buildHeaders(input?: HeadersInit): Headers {
+  const headers = new Headers(input ?? {});
+  headers.set("Authorization", `Bearer ${defaultToken}`);
+  return headers;
+}
+
+async function requestMiddleware(pathWithQuery: string, init?: RequestInit): Promise<Response> {
   return fetch(buildMiddlewareUrl(pathWithQuery), {
-    method: "GET",
     cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${defaultToken}`
-    }
+    ...init,
+    headers: buildHeaders(init?.headers)
   });
+}
+
+async function fetchMiddleware(pathWithQuery: string): Promise<Response> {
+  return requestMiddleware(pathWithQuery, { method: "GET" });
 }
 
 function serviceUnavailableResponse() {
@@ -28,4 +36,4 @@ function serviceUnavailableResponse() {
   };
 }
 
-export { fetchMiddleware, serviceUnavailableResponse };
+export { fetchMiddleware, requestMiddleware, serviceUnavailableResponse };
