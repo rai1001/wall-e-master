@@ -195,3 +195,13 @@ Risks: Cost values are estimated and in-memory baseline; production token accoun
 Validation done: pnpm --filter @clawos/middleware test costs.summary.test.ts; pnpm --filter @clawos/web test:e2e tests/cost-control-widget.spec.ts tests/projects-live-data.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
 Outcome: Added `/api/costs/summary` API and project UI card to monitor spend, update budgets, and surface per-agent cost + control actions.
 ```
+
+```text
+Date: 2026-02-18
+Iteration goal: Add observability dashboard counters and alert-ready status for operators.
+Phase: Phase 4
+Rules checked: 2, 7, 8
+Risks: Counters are currently in-memory and reset on middleware restart.
+Validation done: pnpm --filter @clawos/middleware test observability.summary.test.ts; pnpm --filter @clawos/web test:e2e tests/security-checklist.spec.ts; pnpm --filter @clawos/middleware test; pnpm --filter @clawos/web test:e2e; pnpm --filter @clawos/web build
+Outcome: Added `/api/observability/summary` with rolling security/error counters and integrated `Panel de Observabilidad` in `/security`.
+```

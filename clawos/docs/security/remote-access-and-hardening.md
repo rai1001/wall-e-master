@@ -69,6 +69,11 @@ Current event names:
 - `auth_denied`
 - `rate_limit_denied`
 - `global_memory_access_denied`
+- `project_budget_overrun`
+
+Observability dashboard endpoint:
+
+- `GET /api/observability/summary?window_minutes=60`
 
 ## Threat Baseline
 

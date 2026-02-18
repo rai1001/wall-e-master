@@ -68,6 +68,12 @@ Last update: 2026-02-18
    - guided control actions returned by API for non-technical operators
    - `/projects` now includes `Control de Costos` card with budget update flow
    - middleware and E2E tests for cost summary and budget update behavior
+19. Observability dashboard and alert-ready counters:
+   - new middleware endpoint `GET /api/observability/summary?window_minutes=<n>`
+   - rolling counters for `security_event` and `error_taxonomy`
+   - alert status model (`nominal|watch|critical`) plus active `alerts[]`
+   - `/security` now includes `Panel de Observabilidad` for non-technical operators
+   - middleware and E2E tests for summary counters and UI rendering
 
 ## In Progress
 
@@ -76,5 +82,5 @@ Last update: 2026-02-18
 
 ## Next (Guide-Aligned)
 
-1. Extend observability dashboards and alert-ready counters
-2. Add memory pinning/reinforcement controls in UI
+1. Add memory pinning/reinforcement controls in UI
+2. Persist observability counters to durable storage

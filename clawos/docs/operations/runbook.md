@@ -52,6 +52,8 @@ pnpm --filter @clawos/middleware exec tsx src/server.ts
    - `GET /api/security/checklist` with token should return `200` and actionable `checks[]`
 5. Cost summary check:
    - `GET /api/costs/summary?project_id=proj_001` with token should return `200`
+6. Observability dashboard check:
+   - `GET /api/observability/summary?window_minutes=60` with token should return `200`
 
 ## Authentication Check
 
@@ -122,6 +124,13 @@ Actions:
 1. call `GET /api/costs/summary?project_id=<id>` and identify top spending agents
 2. apply mitigation from `control_actions[]`
 3. if needed, update budget with `PATCH /api/costs/summary`
+
+### 8. Observability `alert_status=critical`
+
+Actions:
+1. call `GET /api/observability/summary?window_minutes=60`
+2. review `alerts[]` and top counters (`security_event_counters`, `error_taxonomy_counters`)
+3. prioritize auth/policy/rate-limit anomalies before feature work
 
 ## Deployment Safety
 

@@ -452,6 +452,31 @@ Response `200`:
 }
 ```
 
+### `GET /api/observability/summary?window_minutes=<n>`
+
+Return alert-ready counters for security events and error taxonomy in a rolling window.
+
+Response `200`:
+
+```json
+{
+  "generated_at": "2026-02-18T12:00:00Z",
+  "window_minutes": 60,
+  "total_security_events": 4,
+  "total_errors": 6,
+  "security_event_counters": [
+    { "key": "auth_denied", "count": 2 },
+    { "key": "rate_limit_denied", "count": 2 }
+  ],
+  "error_taxonomy_counters": [
+    { "key": "validation", "count": 4 },
+    { "key": "auth", "count": 2 }
+  ],
+  "alert_status": "watch",
+  "alerts": ["El rate limit está activándose con frecuencia."]
+}
+```
+
 ### `GET /api/knowledge/feed?project_id=<id>`
 
 Return global discovery feed entries (agent findings timeline).
