@@ -13,6 +13,7 @@ import { projectsRouter } from "./routes/projects";
 import { costsRouter } from "./routes/costs";
 import { securityRouter } from "./routes/security";
 import { voiceRouter } from "./routes/voice";
+import { integrationsRouter } from "./routes/integrations";
 
 const app = express();
 
@@ -31,5 +32,6 @@ app.use("/api/costs", costsRouter);
 app.use("/api/observability", observabilityRouter);
 app.use("/api/security", securityRouter);
 app.use("/api/voice", voiceRouter);
+app.use("/api/integrations", integrationsRouter);
 
 export { app };

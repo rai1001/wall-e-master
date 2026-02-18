@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { OperationalConnectionsPanel } from "../../components/operational-connections";
+
 type CheckStatus = "pass" | "warn";
 
 interface SecurityCheck {
@@ -81,6 +83,7 @@ export default function SecurityPage() {
 
   return (
     <section className="grid">
+      <OperationalConnectionsPanel />
       <article className="card">
         <h2>Checklist de Seguridad Remota</h2>
         <p className="muted">Verificacion automatica para acceso fuera de casa con Tailscale/Cloudflare.</p>
